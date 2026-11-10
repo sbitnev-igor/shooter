@@ -179,10 +179,10 @@ const h=ray.intersectObjects(tgt,false)[0];let point=h?h.point.clone():cam.posit
 const blast=new THREE.Mesh(new THREE.SphereGeometry(.35,12,8),new THREE.MeshBasicMaterial({color:0xff9a42,transparent:true,opacity:.85}));blast.position.copy(point);sc.add(blast);
 const light=new THREE.PointLight(0xff8b38,4,18);light.position.copy(point);sc.add(light);let life=.55;
 const finish=()=>{sc.remove(blast);sc.remove(light);blast.geometry.dispose();blast.material.dispose()};
-const victims=en.filter(e=>e.alive&&Math.hypot(e.x-point.x,e.z-point.z)<9);victims.forEach(e=>{hitE(e,'torso');if(e.alive)hitE(e,'torso')});
+const victims=en.filter(e=>e.alive&&Math.hypot(e.x-point.x,e.z-point.z)<9);victims.forEach(e=>{hitE(e,'torso');if(e.alive)hitE(e,'torso');if(e.alive)hitE(e,'torso')});
 spark(point,0xff9a42);S.shot({x:point.x,y:-.5,z:point.z},1.8);note('STRIKE IMPACT · '+victims.length+' HOSTILES IN BLAST');
 blast.userData.update=dt=>{life-=dt;blast.scale.setScalar(1+(0.55-life)*13);blast.material.opacity=Math.max(0,life/.55);light.intensity=4*Math.max(0,life/.55);if(life<=0){finish();return 0}return 1};
-dronePayloads=$('dronehud').textContent='FPV STRIKE DRONE · PAYLOADS '+dronePayloads}
+$('dronehud').textContent='FPV STRIKE DRONE · PAYLOADS '+dronePayloads}
 function updateDrone(dt){droneCooldown=Math.max(0,droneCooldown-dt);const fwd=new THREE.Vector3(-Math.sin(droneYaw),0,-Math.cos(droneYaw)),right=new THREE.Vector3(Math.cos(droneYaw),0,-Math.sin(droneYaw));
 let mx=I.jx+(K.KeyD?1:0)-(K.KeyA?1:0),mz=(K.KeyW?1:0)-(K.KeyS?1:0),len=Math.hypot(mx,mz);if(len>1){mx/=len;mz/=len}
 const speed=K.ShiftLeft?18:10;drone.position.addScaledVector(right,mx*speed*dt);drone.position.addScaledVector(fwd,mz*speed*dt);
@@ -331,8 +331,8 @@ jr.onpointerdown=e=>{lid=e.pointerId;jr.setPointerCapture(lid);lx=e.clientX;ly=e
 jr.onpointermove=e=>{if(e.pointerId!==lid)return;look((e.clientX-lx)*.0045,(e.clientY-ly)*.0045);lx=e.clientX;ly=e.clientY};
 jr.onpointerup=jr.onpointercancel=()=>lid=null;
 function btn(id,dn,up){const b=$(id);b.onpointerdown=e=>{e.preventDefault();b.setPointerCapture(e.pointerId);dn()};if(up)b.onpointerup=b.onpointercancel=up}
-btn('bF',()=>{if(droneMode)droneStrike();else I.fire=1},()=>I.fire=0);btn('bA',()=>P.aim=!P.aim&&P.rl<=0?1:0);btn('bR',reload);btn('bC',()=>P.crouch=!P.crouch);btn('bU',useIt);btn('bP',pause);btn('bJ',()=>{if(droneMode)K.Space=1;else jump()},()=>K.Space=0);$('bD').onclick=toggleDrone;
-addEventListener('keydown',e=>{K[e.code]=1;if(state!=='play')return;if(e.code==='KeyR'&&!droneMode)reload();if(e.code==='KeyC'){if(droneMode)K.KeyC=1;else P.crouch=!P.crouch}if(e.code==='KeyE')useIt();if(e.code==='Space'&&!droneMode)jump();if(e.code==='KeyF')toggleDrone();if(e.code==='Escape')pause()});
+btn('bF',()=>{if(droneMode)droneStrike();else I.fire=1},()=>I.fire=0);btn('bA',()=>P.aim=!P.aim&&P.rl<=0?1:0);btn('bR',reload);btn('bC',()=>{if(droneMode)K.ControlLeft=1;else P.crouch=!P.crouch},()=>K.ControlLeft=0);btn('bU',useIt);btn('bP',pause);btn('bJ',()=>{if(droneMode)K.Space=1;else jump()},()=>K.Space=0);$('bD').onclick=toggleDrone;
+addEventListener('keydown',e=>{K[e.code]=1;if(state!=='play')return;if(e.code==='KeyR'&&!droneMode)reload();if(e.code==='KeyC'){if(droneMode)K.KeyC=1;else P.crouch=!P.crouch}if(e.code==='KeyE')useIt();if(e.code==='Space'){if(droneMode)K.Space=1;else jump()}if(e.code==='KeyF')toggleDrone();if(e.code==='Escape')pause()});
 addEventListener('keyup',e=>K[e.code]=0);
 addEventListener('blur',()=>{I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0;if(state==='play'&&!T)pause()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0;if(state==='play')pause()}});
