@@ -57,7 +57,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 <div id="jl" class="tc"></div><div id="jr" class="tc"></div><div id="jb" class="tc"><div id="jk"></div></div>
 <button class="b tc" id="bF">FIRE</button><button class="b tc" id="bA">AIM</button><button class="b tc" id="bR">RELOAD</button><button class="b tc" id="bC">CROUCH</button><button class="b tc" id="bU">TAKE</button>
 <button class="b" id="bP">II</button>
-<button class="b tc" id="bJ">JUMP</button><button class="b" id="bD" aria-label="Launch or return FPV strike drone">DRONE [F]</button><div id="dronehud" style="display:none;position:fixed;top:calc(34px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:7px 12px;border:1px solid rgba(216,224,208,.55);background:rgba(8,12,9,.72);font:12px ui-monospace,monospace;letter-spacing:.1em;pointer-events:none;text-align:center">FPV STRIKE DRONE · PAYLOADS 2</div>
+<button class="b tc" id="bJ">JUMP</button><button class="b" id="bD" aria-label="Launch or return FPV strike drone">DRONE [F]</button><div id="dronehud" style="display:none;position:fixed;top:calc(34px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:7px 12px;border:1px solid rgba(216,224,208,.55);background:rgba(8,12,9,.72);font:12px ui-monospace,monospace;letter-spacing:.1em;pointer-events:none;text-align:center">FPV STRIKE DRONE · UNLIMITED</div>
 <div id='ed'><div id='sel'></div><div id='hd'></div></div>
 <div id='edp'><b id='edn' title='Tap to move this panel'></b><label>Size<input type='range' id='esz' min='.5' max='2.2' step='.05' value='1'></label><label>Opacity<input type='range' id='eop' min='.15' max='1' step='.05' value='1'></label><label>Spacing<input type='range' id='esp' min='.6' max='1.5' step='.05' value='1'></label><span><button id='eS'>SAVE LAYOUT</button> <button id='eD'>RESET TO DEFAULT</button> <button id='eC'>CANCEL</button></span></div>
 <div id="menu"><h1 id="mt">BODYCAM</h1><p id="ms">OPERATION: FOREST SHADOW</p>
@@ -154,8 +154,8 @@ mag:()=>{nz(0,.08,1800,.5,'bandpass');tn(0,300,.06,.2,'square',150)},hit:p=>nz(p
 bird:p=>{for(let i=0;i<3+R()*3;i++)setTimeout(()=>tn(p,2500+R()*1500,.08,.08,'sine',3500+R()*1000),i*110)},whiz:p=>nz(p,.12,3000,.4,'bandpass',1200)};
 /* ---------- player ---------- */
 const P={},I={fire:0,aim:0,jx:0,jy:0},K={};let sens=1,state='start',stage=0,tm=0,rec=0;
-let droneMode=false,drone=null,droneYaw=0,dronePitch=-.08,dronePayloads=2,droneCooldown=0;
-function resetP(){droneMode=false;dronePayloads=2;if(drone)drone.visible=false;W.visible=true;$('bD').textContent='DRONE [F]';$('dronehud').style.display='none';Object.assign(P,{x:0,z:70,floor:0,yaw:0,pitch:0,eye:1.65,vx:0,vz:0,crouch:0,aim:0,run:0,mv:0,dead:0,dT:0,tr:0,fl:0,arm:0,leg:0,bleed:0,ammo:30,res:150,h:0,vy:0,fT:0,rl:0,kick:0,rp:0,ph:0,sx:0,sy:0,roll:0,hb:0,stp:0});$('f').style.opacity=0;$('h').style.opacity=0;$('c').style.filter=''}
+let droneMode=false,drone=null,droneYaw=0,dronePitch=-.08,droneCooldown=0;
+function resetP(){droneMode=false;if(drone)drone.visible=false;W.visible=true;$('bD').textContent='DRONE [F]';$('dronehud').style.display='none';Object.assign(P,{x:0,z:70,floor:0,yaw:0,pitch:0,eye:1.65,vx:0,vz:0,crouch:0,aim:0,run:0,mv:0,dead:0,dT:0,tr:0,fl:0,arm:0,leg:0,bleed:0,ammo:30,res:150,h:0,vy:0,fT:0,rl:0,kick:0,rp:0,ph:0,sx:0,sy:0,roll:0,hb:0,stp:0});$('f').style.opacity=0;$('h').style.opacity=0;$('c').style.filter=''}
 function look(dx,dy){if(droneMode){droneYaw-=dx*sens;dronePitch=cl(dronePitch-dy*sens,-.65,.28);return}const s=sens*(P.aim?.5:1);P.yaw-=dx*s;P.pitch=cl(P.pitch-dy*s,-1.4,1.4);P.sx=cl(P.sx+dx,-.15,.15);P.sy=cl(P.sy+dy,-.15,.15)}
 function upP(dt){
 if(droneMode){updateDrone(dt);return}
@@ -187,11 +187,11 @@ function buildDrone(){if(drone)return;drone=new THREE.Group();const shell=new TH
 for(let i of [-1,1])for(let j of [-1,1]){const arm=new THREE.Mesh(new THREE.BoxGeometry(.62,.045,.045),mat('#303832'));arm.position.set(i*.25,.015,j*.25);arm.rotation.y=i*j*.35;drone.add(arm);
 const rotor=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.025,12),new THREE.MeshStandardMaterial({color:0x171c19,roughness:.65}));rotor.position.set(i*.48,.08,j*.48);drone.add(rotor)}
 const lens=new THREE.Mesh(new THREE.SphereGeometry(.075,10,8),new THREE.MeshBasicMaterial({color:0x79c9d0}));lens.position.set(0,-.015,-.19);drone.add(lens);sc.add(drone);drone.visible=false}
-function toggleDrone(){if(state!=='play'||P.dead)return;if(!droneMode&&dronePayloads<=0){note('NO DRONES LEFT');return}buildDrone();droneMode=!droneMode;
+function toggleDrone(){if(state!=='play'||P.dead)return;buildDrone();droneMode=!droneMode;
 if(droneMode){drone.position.set(P.x,5.2,P.z);droneYaw=P.yaw;dronePitch=-.04;drone.visible=true;W.visible=false;P.aim=0;$('bD').textContent='RETURN [F]';note('FPV DRONE ACTIVE · AUTO-FORWARD · MOUSE: STEER · SPACE/CTRL: ALTITUDE · IMPACT: DETONATE')}
-else{drone.visible=false;W.visible=true;cam.fov=85;cam.updateProjectionMatrix();$('bD').textContent='DRONE [F]';note('Returning to body camera')}$('dronehud').style.display=droneMode?'block':'none';if(droneMode)$('dronehud').textContent='FPV STRIKE DRONE · PAYLOADS '+dronePayloads}
+else{drone.visible=false;W.visible=true;cam.fov=85;cam.updateProjectionMatrix();$('bD').textContent='DRONE [F]';note('Returning to body camera')}$('dronehud').style.display=droneMode?'block':'none';if(droneMode)$('dronehud').textContent='FPV STRIKE DRONE · UNLIMITED'}
 function droneDetonate(point){
- if(!droneMode)return;droneMode=false;dronePayloads=Math.max(0,dronePayloads-1);
+ if(!droneMode)return;droneMode=false;
  const blast=new THREE.Mesh(new THREE.SphereGeometry(.5,16,12),new THREE.MeshBasicMaterial({color:0xff9a42,transparent:true,opacity:.92}));blast.position.copy(point);sc.add(blast);
  const light=new THREE.PointLight(0xff8b38,8,30);light.position.copy(point);sc.add(light);let life=.8;
  const victims=en.filter(e=>e.alive&&Math.hypot(e.x-point.x,e.z-point.z)<16);
