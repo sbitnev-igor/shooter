@@ -210,7 +210,7 @@ function updateDrone(dt){
  if(hits.length){drone.position.copy(hits[0].point);cam.position.copy(drone.position);cam.rotation.set(dronePitch,droneYaw,0);droneDetonate(hits[0].point.clone());return}
  drone.position.addScaledVector(dir,step);
  if(drone.position.x<-108||drone.position.x>108||drone.position.z<-108||drone.position.z>108){droneDetonate(drone.position.clone());return}
- cam.position.copy(drone.position);cam.rotation.set(dronePitch,droneYaw,0);const tf=92;if(Math.abs(cam.fov-tf)>.1){cam.fov=lp(cam.fov,tf,dt*5);cam.updateProjectionMatrix()}
+ cam.position.copy(drone.position).addScaledVector(dir,.23);cam.rotation.set(dronePitch,droneYaw,0);const tf=92;if(Math.abs(cam.fov-tf)>.1){cam.fov=lp(cam.fov,tf,dt*5);cam.updateProjectionMatrix()}
 }
 function reload(){if(P.rl>0||P.ammo>=30||P.res<=0||P.dead)return;P.rl=2.3;P.aim=0;S.click()}
 function fire(){if(P.rl>0||P.fT>0||P.dead)return;if(P.ammo<=0){S.click();P.fT=.3;return}
