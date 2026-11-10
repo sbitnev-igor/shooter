@@ -355,13 +355,13 @@ jr.onpointerdown=e=>{lid=e.pointerId;jr.setPointerCapture(lid);lx=e.clientX;ly=e
 jr.onpointermove=e=>{if(e.pointerId!==lid)return;look((e.clientX-lx)*.0045,(e.clientY-ly)*.0045);lx=e.clientX;ly=e.clientY};
 jr.onpointerup=jr.onpointercancel=()=>lid=null;
 function btn(id,dn,up){const b=$(id);b.onpointerdown=e=>{e.preventDefault();b.setPointerCapture(e.pointerId);dn()};if(up)b.onpointerup=b.onpointercancel=up}
-btn('bF',()=>{if(droneMode)droneStrike();else I.fire=1},()=>I.fire=0);btn('bA',()=>P.aim=!P.aim&&P.rl<=0?1:0);btn('bR',reload);btn('bC',()=>{if(droneMode)K.ControlLeft=1;else P.crouch=!P.crouch},()=>K.ControlLeft=0);btn('bU',useIt);btn('bP',pause);btn('bJ',()=>{if(droneMode)K.Space=1;else jump()},()=>K.Space=0);$('bD').onclick=toggleDrone;
+btn('bF',()=>{if(!droneMode)I.fire=1},()=>I.fire=0);btn('bA',()=>P.aim=!P.aim&&P.rl<=0?1:0);btn('bR',reload);btn('bC',()=>{if(droneMode)K.ControlLeft=1;else P.crouch=!P.crouch},()=>K.ControlLeft=0);btn('bU',useIt);btn('bP',pause);btn('bJ',()=>{if(droneMode)K.Space=1;else jump()},()=>K.Space=0);$('bD').onclick=toggleDrone;
 addEventListener('keydown',e=>{K[e.code]=1;if(state!=='play')return;if(e.code==='KeyR'&&!droneMode)reload();if(e.code==='KeyC'){if(droneMode)K.KeyC=1;else P.crouch=!P.crouch}if(e.code==='KeyE')useIt();if(e.code==='Space'){if(droneMode)K.Space=1;else jump()}if(e.code==='KeyF')toggleDrone();if(e.code==='Escape')pause()});
 addEventListener('keyup',e=>K[e.code]=0);
 addEventListener('blur',()=>{I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0;if(state==='play'&&!T)pause()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0;if(state==='play')pause()}});
 addEventListener('mousemove',e=>{if(document.pointerLockElement&&state==='play')look(e.movementX*.0022,e.movementY*.0022)});
-addEventListener('mousedown',e=>{if(!T&&state==='play'){if(!document.pointerLockElement)return lock();if(e.button===0){if(droneMode)droneStrike();else I.fire=1}if(e.button===2&&!droneMode)P.aim=P.rl<=0?1:0}});
+addEventListener('mousedown',e=>{if(!T&&state==='play'){if(!document.pointerLockElement)return lock();if(e.button===0&&!droneMode)I.fire=1if(e.button===2&&!droneMode)P.aim=P.rl<=0?1:0}});
 addEventListener('mouseup',e=>{if(e.button===0)I.fire=0;if(e.button===2)P.aim=0});
 document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockElement&&state==='play'&&!T)pause()});
 addEventListener('contextmenu',e=>e.preventDefault());
