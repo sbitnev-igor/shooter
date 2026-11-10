@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>BODYCAM: Operation Forest Shadow</title>
+<title>BODYCAM: Operation Broken Signal</title>
 <style>
 :root{color-scheme:dark;--a:#d8e0d0;--ui:rgba(20,26,20,.45);--bd:rgba(216,224,208,.45)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-touch-callout:none}
@@ -301,9 +301,9 @@ const paths=[[[0,8],[5,1],[10,-7]],[[12,-8],[17,-17],[19,-27]],[[-15,-10],[-20,-
 function spawnAll(){en.forEach(e=>sc.remove(e.g));en.length=0;paths.forEach((p,i)=>spawn(p,i%2?'c':'a'));rebuild()}
 /* ---------- mission / UI ---------- */
 let nt;function note(t){const n=$('note');n.textContent=t;n.style.opacity=1;clearTimeout(nt);nt=setTimeout(()=>n.style.opacity=0,4500)}
-function intro(){const i=$('intro');i.innerHTML='<b>OPERATION: FOREST SHADOW</b><span>Enter through the open earth ramp and follow the connected trench line. Duckboards, timber revetments and sandbag firing bays mark the route. Press F to launch the strike drone and take control from its FPV camera.</span>';i.style.opacity=1;setTimeout(()=>i.style.opacity=0,6500);setTimeout(()=>note('Follow the service road through the ruined village to the northern relay compound. Press F to launch the FPV strike drone.'),7600)}
+function intro(){const i=$('intro');i.innerHTML='<b>OPERATION: BROKEN SIGNAL</b><span>Push along the winding service road, fight through the ruined hamlet and breach the northern relay compound. Press F to launch the strike drone and take control from its FPV camera.</span>';i.style.opacity=1;setTimeout(()=>i.style.opacity=0,6500);setTimeout(()=>note('Follow the service road through the ruined village to the northern relay compound. Press F to launch the FPV strike drone.'),7600)}
 function show(m){state=m==='start'?'start':m==='play'?'play':m;if(m!=='play'){droneMode=false;W.visible=true;$('bD').textContent='DRONE [F]';$('dronehud').style.display='none';if(drone)drone.visible=false;I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0}const mn=$('menu');mn.style.display=m==='play'?'none':'flex';$('set').style.display='none';
-const t={start:['BODYCAM','OPERATION: FOREST SHADOW'],pause:['PAUSED','OPERATION: FOREST SHADOW'],dead:['KIA','You did not make it out.'],win:['MISSION COMPLETE','Intel secured. Exfiltration under way.']}[m]||['',''];$('mt').style.display=$('ms').style.display='';$('mt').textContent=t[0];$('ms').textContent=t[1];
+const t={start:['BODYCAM','OPERATION: BROKEN SIGNAL'],pause:['PAUSED','OPERATION: BROKEN SIGNAL'],dead:['KIA','You did not make it out.'],win:['MISSION COMPLETE','Intel secured. Exfiltration under way.']}[m]||['',''];$('mt').style.display=$('ms').style.display='';$('mt').textContent=t[0];$('ms').textContent=t[1];
 $('mP').style.display=m==='start'?'':'none';$('mRs').style.display=m==='pause'?'':'none';$('mRe').style.display=m==='start'?'none':'';$('mS').style.display='';if(m!=='play'&&document.exitPointerLock)document.exitPointerLock()}
 function start(){audio();resetP();spawnAll();stage=0;intel.visible=true;show('play');intro();lock()}
 function lock(){if(!T&&$('c').requestPointerLock)$('c').requestPointerLock()}
