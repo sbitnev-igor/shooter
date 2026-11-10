@@ -81,6 +81,7 @@ const mc={},mat=c=>mc[c]||(mc[c]=new THREE.MeshStandardMaterial({color:c,roughne
 function tex(c,n){const k=document.createElement('canvas');k.width=k.height=128;const x=k.getContext('2d');x.fillStyle=c;x.fillRect(0,0,128,128);for(let i=0;i<n;i++){x.fillStyle=`rgba(${R()*60|0},${R()*70|0},${R()*30|0},.25)`;x.fillRect(R()*128,R()*128,1+R()*3,1+R()*3)}const t=new THREE.CanvasTexture(k);t.encoding=THREE.sRGBEncoding;t.anisotropy=Math.min(8,rd.capabilities.getMaxAnisotropy());t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
 const gt=tex('#4b503d',1100);gt.repeat.set(64,64);
 // Rebuilt battlefield: an interconnected trench system with fire bays and dugouts.
+const MAP_Y=8; // Raise the complete battlefield above the original world origin.
 const trenchLines=[
  [[0,78],[0,54],[-8,43],[-8,22],[-2,12],[-2,-8],[9,-20],[9,-42],[0,-53],[0,-82]],
  [[-8,43],[-25,32],[-38,32],[-48,22]],
@@ -93,24 +94,24 @@ const trenchLines=[
 function segDist(x,z,a,b){const dx=b[0]-a[0],dz=b[1]-a[1],t=cl(((x-a[0])*dx+(z-a[1])*dz)/(dx*dx+dz*dz),0,1);return Math.hypot(x-a[0]-dx*t,z-a[1]-dz*t)}
 function trenchDepth(x,z){let d=1e6;for(const line of trenchLines)for(let i=1;i<line.length;i++)d=Math.min(d,segDist(x,z,line[i-1],line[i]));if(d>3.9)return 0;const t=cl((d-1.9)/2,0,1);return 2.35*(1-t*t*(3-2*t))}
 const GS=260,gv=new Float32Array((GS+1)*(GS+1)*3),guv=new Float32Array((GS+1)*(GS+1)*2),gix=[];
-for(let iz=0;iz<=GS;iz++)for(let ix=0;ix<=GS;ix++){const n=iz*(GS+1)+ix,x=-130+ix,z=-130+iz;gv[n*3]=x;gv[n*3+1]=-trenchDepth(x,z);gv[n*3+2]=z;guv[n*2]=ix/GS;guv[n*2+1]=iz/GS}
+for(let iz=0;iz<=GS;iz++)for(let ix=0;ix<=GS;ix++){const n=iz*(GS+1)+ix,x=-130+ix,z=-130+iz;gv[n*3]=x;gv[n*3+1]=MAP_Y-trenchDepth(x,z);gv[n*3+2]=z;guv[n*2]=ix/GS;guv[n*2+1]=iz/GS}
 for(let iz=0;iz<GS;iz++)for(let ix=0;ix<GS;ix++){const a=iz*(GS+1)+ix,b=a+1,c=a+GS+1,d=c+1;gix.push(a,c,b,b,c,d)}
 const gg=new THREE.BufferGeometry();gg.setAttribute('position',new THREE.BufferAttribute(gv,3));gg.setAttribute('uv',new THREE.BufferAttribute(guv,2));gg.setIndex(gix);gg.computeVertexNormals();
 const ground=new THREE.Mesh(gg,new THREE.MeshLambertMaterial({map:gt,side:THREE.DoubleSide}));ground.receiveShadow=true;sc.add(ground);
 const cols=[],blk=[],trees=[],cov=[];
-function bx(x,y,z,w,h,d,c,solid=true){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));m.position.set(x,y+h/2,z);m.castShadow=m.receiveShadow=true;sc.add(m);if(solid)cols.push([x-w/2,x+w/2,z-d/2,z+d/2]);blk.push(m);return m}
+function bx(x,y,z,w,h,d,c,solid=true){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));m.position.set(x,y+h/2+MAP_Y,z);m.castShadow=m.receiveShadow=true;sc.add(m);if(solid)cols.push([x-w/2,x+w/2,z-d/2,z+d/2]);blk.push(m);return m}
 function cv(x,z,w,d,h,c){bx(x,0,z,w,h,d,c)}
 function bld(x,z,w,d,h,c){const t=.4,g=Math.min(3.4,w*.42),sw=(w-g)/2;bx(x,0,z-d/2,w,h,t,c);bx(x-w/2,0,z,t,h,d,c);bx(x+w/2,0,z,t,h,d,c);bx(x-g/2-sw/2,0,z+d/2,sw,h,t,c);bx(x+g/2+sw/2,0,z+d/2,sw,h,t,c);bx(x,h-1.2,z+d/2,g,1.2,t,c,false)}
 function wall(x,z,w,d,h=1.5,c='#625b49'){bx(x,0,z,w,h,d,c)}
 // Earthen parapets follow both sides of the trenches, with staggered firing bays.
-function berm(a,b,side){const dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz),nx=-dz/len*side,nz=dx/len*side;const m=new THREE.Mesh(new THREE.BoxGeometry(len,.95,1.15),mat('#625b43'));m.position.set((a[0]+b[0])/2+nx*2.75,.25,(a[1]+b[1])/2+nz*2.75);m.rotation.y=-Math.atan2(dz,dx);m.castShadow=m.receiveShadow=true;sc.add(m);blk.push(m)}
+function berm(a,b,side){const dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz),nx=-dz/len*side,nz=dx/len*side;const m=new THREE.Mesh(new THREE.BoxGeometry(len,.95,1.15),mat('#625b43'));m.position.set((a[0]+b[0])/2+nx*2.75,MAP_Y+.25,(a[1]+b[1])/2+nz*2.75);m.rotation.y=-Math.atan2(dz,dx);m.castShadow=m.receiveShadow=true;sc.add(m);blk.push(m)}
 for(const line of trenchLines)for(let i=1;i<line.length;i++){berm(line[i-1],line[i],1);berm(line[i-1],line[i],-1)}
 // Dugouts, command pits, ammo bays and timber revetments.
 for(const p of [[-8,24],[9,-37],[-25,-53],[29,-65],[0,-75]]){bx(p[0],-2.25,p[1],3.2,.22,2.6,'#34372e',false);wall(p[0]-1.5,p[1],.35,2.8,1.4,'#514b3b');wall(p[0]+1.5,p[1],.35,2.8,1.4,'#514b3b')}
 for(const p of [[-14,40],[13,-13],[-30,-23],[31,-42],[0,-59]]){bx(p[0],0,p[1],4,.8,2.4,'#6b624b');bx(p[0],.8,p[1],.35,.35,2.4,'#403c31',false)}
-for(const p of [[-42,10],[43,-18],[-45,-47],[47,-67]]){const m=new THREE.Mesh(new THREE.CylinderGeometry(2.2,3.2,.45,12),mat('#45483d'));m.position.set(p[0],-.1,p[1]);m.scale.z=.75;m.receiveShadow=true;sc.add(m);blk.push(m)}
-const intel=new THREE.Mesh(new THREE.BoxGeometry(.5,.25,.35),new THREE.MeshBasicMaterial({color:0x7dffa0}));intel.position.set(3,-1.9,-63);sc.add(intel);
-function getFloorY(x,z){return -trenchDepth(x,z)}
+for(const p of [[-42,10],[43,-18],[-45,-47],[47,-67]]){const m=new THREE.Mesh(new THREE.CylinderGeometry(2.2,3.2,.45,12),mat('#45483d'));m.position.set(p[0],MAP_Y-.1,p[1]);m.scale.z=.75;m.receiveShadow=true;sc.add(m);blk.push(m)}
+const intel=new THREE.Mesh(new THREE.BoxGeometry(.5,.25,.35),new THREE.MeshBasicMaterial({color:0x7dffa0}));intel.position.set(3,MAP_Y-1.9,-63);sc.add(intel);
+function getFloorY(x,z){return MAP_Y-trenchDepth(x,z)}
 function blocked(x,z,r){if(Math.abs(x)>112||Math.abs(z)>112)return 1;for(const c of cols)if(x>c[0]-r&&x<c[1]+r&&z>c[2]-r&&z<c[3]+r)return 1;for(let i=0;i<trees.length;i+=2){const a=x-trees[i],b=z-trees[i+1];if(a*a+b*b<(r+.35)*(r+.35))return 1}return 0}
 function move(o,dx,dz,r){if(!blocked(o.x+dx,o.z,r))o.x+=dx;if(!blocked(o.x,o.z+dz,r))o.z+=dz}
 /* ---------- forest (instanced) ---------- */
@@ -122,7 +123,7 @@ fragmentShader:'uniform sampler2D t;varying vec2 u;void main(){vec2 d=u-.5;vec2 
 function fitRT(){const p=rd.getPixelRatio();rtT.setSize(Math.floor(innerWidth*p),Math.floor(innerHeight*p))}
 function mist(){if(mg)sc.remove(mg);mg=new THREE.Group();sc.add(mg);mi=[];const n=[0,28,56][Q];if(!n)return;const k=document.createElement('canvas');k.width=k.height=64;const x=k.getContext('2d'),g=x.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'rgba(255,255,255,.9)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,64,64);const t=new THREE.CanvasTexture(k);
 for(let i=0;i<n;i++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,color:0xc8d2cc,transparent:true,opacity:.13+R()*.07,depthWrite:false})),a=R()*6.28,r=R()*60;s.position.set(P.x+Math.cos(a)*r,.8+R()*2.2,P.z+Math.sin(a)*r);s.scale.setScalar(12+R()*12);mg.add(s);mi.push(s)}}
-function forest(){if(fg){sc.remove(fg);fg.traverse(o=>o.geometry&&o.geometry.dispose())}fg=new THREE.Group();sc.add(fg);trees.length=0;
+function forest(){if(fg){sc.remove(fg);fg.traverse(o=>o.geometry&&o.geometry.dispose())}fg=new THREE.Group();fg.position.y=MAP_Y;sc.add(fg);trees.length=0;
 const n=[260,560,900][Q],g=[0,1500,3500][Q],tr=new THREE.InstancedMesh(new THREE.CylinderGeometry(.18,.3,1,5),mat('#4a3a2a'),n),c1=new THREE.InstancedMesh(new THREE.ConeGeometry(1.8,4,6),wmat(.3,.25),n),c2=new THREE.InstancedMesh(new THREE.ConeGeometry(1.3,4,6),wmat(.35,.25),n),
 bu=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.8,0),wmat(.06,.6),n>>1),rk=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(.8,0),mat('#777a72'),n>>2),gr=g?new THREE.InstancedMesh(new THREE.ConeGeometry(.07,.8,3),wmat(.3,1.25),g):0;
 const M=new THREE.Matrix4(),C=new THREE.Color(),Sc=new THREE.Vector3(),Q4=new THREE.Quaternion(),P3=new THREE.Vector3(),ok=(x,z)=>!(Math.abs(x)<34&&z>-88&&z<82)&&Math.hypot(x,z-70)>9;
