@@ -24,7 +24,9 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 #bC{width:56px;height:56px;right:calc(96px + env(safe-area-inset-right));bottom:calc(142px + env(safe-area-inset-bottom))}
 #bU{width:64px;height:64px;left:50%;margin-left:-32px;bottom:calc(30% + env(safe-area-inset-bottom));display:none}
 #bJ{width:56px;height:56px;left:calc(50% + 34px);bottom:calc(36px + env(safe-area-inset-bottom))}
-#bD{width:58px;height:58px;left:calc(50% - 98px);bottom:calc(36px + env(safe-area-inset-bottom));font-size:10px}
+#bD{width:76px;height:42px;left:50%;transform:translateX(-50%);bottom:calc(112px + env(safe-area-inset-bottom));font-size:10px;border-radius:5px;z-index:4;background:rgba(8,18,15,.82);border-color:rgba(110,210,170,.7);letter-spacing:.08em}
+#bD:hover{background:rgba(25,65,48,.92)}
+#dronehud:after{content:'  ·  F: RETURN';display:block;margin-top:4px;font-size:10px;opacity:.7}
 #bP{width:40px;height:40px;top:calc(8px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right))}
 #jl{position:fixed;left:0;top:0;width:42%;height:100%}#jr{position:fixed;left:42%;top:0;width:58%;height:100%}
 #jb{position:fixed;display:block;border:1.5px solid var(--bd);border-radius:50%;background:var(--ui);pointer-events:none}
@@ -55,7 +57,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 <div id="jl" class="tc"></div><div id="jr" class="tc"></div><div id="jb" class="tc"><div id="jk"></div></div>
 <button class="b tc" id="bF">FIRE</button><button class="b tc" id="bA">AIM</button><button class="b tc" id="bR">RELOAD</button><button class="b tc" id="bC">CROUCH</button><button class="b tc" id="bU">TAKE</button>
 <button class="b" id="bP">II</button>
-<button class="b tc" id="bJ">JUMP</button><button class="b tc" id="bD">DRONE</button><div id="dronehud" style="display:none;position:fixed;top:calc(34px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:7px 12px;border:1px solid rgba(216,224,208,.55);background:rgba(8,12,9,.72);font:12px ui-monospace,monospace;letter-spacing:.1em;pointer-events:none;text-align:center">FPV STRIKE DRONE · PAYLOADS 2</div>
+<button class="b tc" id="bJ">JUMP</button><button class="b" id="bD" aria-label="Launch or return FPV strike drone">DRONE [F]</button><div id="dronehud" style="display:none;position:fixed;top:calc(34px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:7px 12px;border:1px solid rgba(216,224,208,.55);background:rgba(8,12,9,.72);font:12px ui-monospace,monospace;letter-spacing:.1em;pointer-events:none;text-align:center">FPV STRIKE DRONE · PAYLOADS 2</div>
 <div id='ed'><div id='sel'></div><div id='hd'></div></div>
 <div id='edp'><b id='edn' title='Tap to move this panel'></b><label>Size<input type='range' id='esz' min='.5' max='2.2' step='.05' value='1'></label><label>Opacity<input type='range' id='eop' min='.15' max='1' step='.05' value='1'></label><label>Spacing<input type='range' id='esp' min='.6' max='1.5' step='.05' value='1'></label><span><button id='eS'>SAVE LAYOUT</button> <button id='eD'>RESET TO DEFAULT</button> <button id='eC'>CANCEL</button></span></div>
 <div id="menu"><h1 id="mt">BODYCAM</h1><p id="ms">OPERATION: FOREST SHADOW</p>
@@ -171,8 +173,8 @@ for(let i of [-1,1])for(let j of [-1,1]){const arm=new THREE.Mesh(new THREE.BoxG
 const rotor=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.025,12),new THREE.MeshStandardMaterial({color:0x171c19,roughness:.65}));rotor.position.set(i*.48,.08,j*.48);drone.add(rotor)}
 const lens=new THREE.Mesh(new THREE.SphereGeometry(.075,10,8),new THREE.MeshBasicMaterial({color:0x79c9d0}));lens.position.set(0,-.015,-.19);drone.add(lens);sc.add(drone);drone.visible=false}
 function toggleDrone(){if(state!=='play'||P.dead)return;buildDrone();droneMode=!droneMode;
-if(droneMode){drone.position.set(P.x,5.2,P.z);droneYaw=P.yaw;dronePitch=-.08;drone.visible=true;W.visible=false;P.aim=0;note('DRONE FPV: WASD move · mouse look · SPACE/CTRL altitude · FIRE drops payload · F return')}
-else{drone.visible=false;W.visible=true;cam.fov=85;cam.updateProjectionMatrix();note('Returning to body camera')}$('dronehud').style.display=droneMode?'block':'none';if(droneMode)$('dronehud').textContent='FPV STRIKE DRONE · PAYLOADS '+dronePayloads}
+if(droneMode){drone.position.set(P.x,5.2,P.z);droneYaw=P.yaw;dronePitch=-.08;drone.visible=true;W.visible=false;P.aim=0;$('bD').textContent='RETURN [F]';note('FPV DRONE ACTIVE · WASD: MOVE · MOUSE: LOOK · SPACE/CTRL: ALTITUDE · LMB: STRIKE')}
+else{drone.visible=false;W.visible=true;cam.fov=85;cam.updateProjectionMatrix();$('bD').textContent='DRONE [F]';note('Returning to body camera')}$('dronehud').style.display=droneMode?'block':'none';if(droneMode)$('dronehud').textContent='FPV STRIKE DRONE · PAYLOADS '+dronePayloads}
 function droneStrike(){if(!droneMode||dronePayloads<=0||droneCooldown>0)return;dronePayloads--;droneCooldown=1.1;
 const dir=new THREE.Vector3(0,0,-1).applyEuler(cam.rotation).normalize();ray.set(cam.position,dir);ray.far=90;
 const h=ray.intersectObjects(tgt,false)[0];let point=h?h.point.clone():cam.position.clone().addScaledVector(dir,35);point.y=-2.12;
@@ -280,7 +282,7 @@ function spawnAll(){en.forEach(e=>sc.remove(e.g));en.length=0;paths.forEach((p,i
 /* ---------- mission / UI ---------- */
 let nt;function note(t){const n=$('note');n.textContent=t;n.style.opacity=1;clearTimeout(nt);nt=setTimeout(()=>n.style.opacity=0,4500)}
 function intro(){const i=$('intro');i.innerHTML='<b>OPERATION: FOREST SHADOW</b><span>Move through sunken trenches below ground level. Enemy riflemen hold the firing bays. Press F to launch the strike drone and take control from its FPV camera.</span>';i.style.opacity=1;setTimeout(()=>i.style.opacity=0,6500);setTimeout(()=>note('Trenches are below ground level. Press F to launch the FPV strike drone.'),7600)}
-function show(m){state=m==='start'?'start':m==='play'?'play':m;if(m!=='play'){droneMode=false;if(drone)drone.visible=true;I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0}const mn=$('menu');mn.style.display=m==='play'?'none':'flex';$('set').style.display='none';
+function show(m){state=m==='start'?'start':m==='play'?'play':m;if(m!=='play'){droneMode=false;$('bD').textContent='DRONE [F]';$('dronehud').style.display='none';if(drone)drone.visible=false;I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0}const mn=$('menu');mn.style.display=m==='play'?'none':'flex';$('set').style.display='none';
 const t={start:['BODYCAM','OPERATION: FOREST SHADOW'],pause:['PAUSED','OPERATION: FOREST SHADOW'],dead:['KIA','You did not make it out.'],win:['MISSION COMPLETE','Intel secured. Exfiltration under way.']}[m]||['',''];$('mt').style.display=$('ms').style.display='';$('mt').textContent=t[0];$('ms').textContent=t[1];
 $('mP').style.display=m==='start'?'':'none';$('mRs').style.display=m==='pause'?'':'none';$('mRe').style.display=m==='start'?'none':'';$('mS').style.display='';if(m!=='play'&&document.exitPointerLock)document.exitPointerLock()}
 function start(){audio();resetP();spawnAll();stage=0;intel.visible=true;show('play');intro();lock()}
