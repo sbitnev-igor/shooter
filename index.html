@@ -111,6 +111,7 @@ for(const p of [[-14,40],[13,-13],[-30,-23],[31,-42],[0,-59]]){bx(p[0],0,p[1],4,
 for(const p of [[-42,10],[43,-18],[-45,-47],[47,-67]]){const m=new THREE.Mesh(new THREE.CylinderGeometry(2.2,3.2,.45,12),mat('#45483d'));m.position.set(p[0],-.1,p[1]);m.scale.z=.75;m.receiveShadow=true;sc.add(m);blk.push(m)}
 const intel=new THREE.Mesh(new THREE.BoxGeometry(.5,.25,.35),new THREE.MeshBasicMaterial({color:0x7dffa0}));intel.position.set(3,-1.9,-63);sc.add(intel);
 function getFloorY(x,z){return -trenchDepth(x,z)}
+function blocked(x,z,r){if(Math.abs(x)>112||Math.abs(z)>112)return 1;for(const c of cols)if(x>c[0]-r&&x<c[1]+r&&z>c[2]-r&&z<c[3]+r)return 1;for(let i=0;i<trees.length;i+=2){const a=x-trees[i],b=z-trees[i+1];if(a*a+b*b<(r+.35)*(r+.35))return 1}return 0}
 function move(o,dx,dz,r){if(!blocked(o.x+dx,o.z,r))o.x+=dx;if(!blocked(o.x,o.z+dz,r))o.z+=dz}
 /* ---------- forest (instanced) ---------- */
 let Q=1,fg,mi=[],mg;const windU={value:0};
