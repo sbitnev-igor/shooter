@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>BODYCAM: Operation Forest Shadow</title>
+<title>BODYCAM: Operation Broken Signal</title>
 <style>
 :root{color-scheme:dark;--a:#d8e0d0;--ui:rgba(20,26,20,.45);--bd:rgba(216,224,208,.45)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-touch-callout:none}
@@ -79,56 +79,48 @@ const sun=new THREE.DirectionalLight(0xffedcf,2.0);sc.add(sun,sun.target);Object
 const mz=new THREE.PointLight(0xffc070,0,14);mz.position.set(.2,-.1,-1);cam.add(mz);
 const mc={},mat=c=>mc[c]||(mc[c]=new THREE.MeshStandardMaterial({color:c,roughness:.88,metalness:.04}));
 function tex(c,n){const k=document.createElement('canvas');k.width=k.height=128;const x=k.getContext('2d');x.fillStyle=c;x.fillRect(0,0,128,128);for(let i=0;i<n;i++){x.fillStyle=`rgba(${R()*60|0},${R()*70|0},${R()*30|0},.25)`;x.fillRect(R()*128,R()*128,1+R()*3,1+R()*3)}const t=new THREE.CanvasTexture(k);t.encoding=THREE.sRGBEncoding;t.anisotropy=Math.min(8,rd.capabilities.getMaxAnisotropy());t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
-const gt=tex('#4a5638',700);gt.repeat.set(70,70);
-// Real terrain cut-outs: a half-metre grid leaves the complete trench network open.
-const trenchRects=[[0,-20,5,84],[-10,-8,20,5],[10,-30,20,5],[-10,-52,20,5]];
-const GS=520,gv=new Float32Array((GS+1)*(GS+1)*3),guv=new Float32Array((GS+1)*(GS+1)*2),gix=[];
-for(let iz=0;iz<=GS;iz++)for(let ix=0;ix<=GS;ix++){const n=iz*(GS+1)+ix,x=-130+ix*.5,z=-130+iz*.5;gv[n*3]=x;gv[n*3+1]=0;gv[n*3+2]=z;guv[n*2]=(x+130)/260;guv[n*2+1]=(z+130)/260}
-for(let iz=0;iz<GS;iz++)for(let ix=0;ix<GS;ix++){const x=-129.75+ix*.5,z=-129.75+iz*.5;if(trenchRects.some(r=>Math.abs(x-r[0])<r[2]/2&&Math.abs(z-r[1])<r[3]/2))continue;const a=iz*(GS+1)+ix,b=a+1,c=a+GS+1,d=c+1;gix.push(a,c,b,b,c,d)}
+const gt=tex('#4b503d',1100);gt.repeat.set(64,64);
+// New battlefield: a broad valley, a winding service road, a ruined hamlet and a northern relay site.
+const GS=260,gv=new Float32Array((GS+1)*(GS+1)*3),guv=new Float32Array((GS+1)*(GS+1)*2),gix=[];
+for(let iz=0;iz<=GS;iz++)for(let ix=0;ix<=GS;ix++){const n=iz*(GS+1)+ix,x=-130+ix,z=-130+iz;gv[n*3]=x;gv[n*3+1]=0;gv[n*3+2]=z;guv[n*2]=ix/GS;guv[n*2+1]=iz/GS}
+for(let iz=0;iz<GS;iz++)for(let ix=0;ix<GS;ix++){const a=iz*(GS+1)+ix,b=a+1,c=a+GS+1,d=c+1;gix.push(a,c,b,b,c,d)}
 const gg=new THREE.BufferGeometry();gg.setAttribute('position',new THREE.BufferAttribute(gv,3));gg.setAttribute('uv',new THREE.BufferAttribute(guv,2));gg.setIndex(gix);gg.computeVertexNormals();
 const ground=new THREE.Mesh(gg,new THREE.MeshLambertMaterial({map:gt,side:THREE.DoubleSide}));ground.receiveShadow=true;sc.add(ground);
-const rt=tex('#5a4a38',900);rt.repeat.set(2,14);
-[[0,66.5,8,87]].forEach(r=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(r[2],r[3]),new THREE.MeshLambertMaterial({map:rt}));m.rotation.x=-PI/2;m.position.set(r[0],.03,r[1]);m.receiveShadow=true;sc.add(m)});
-/* ---------- world: colliders, blockers, cover ---------- */
+const rt=tex('#514b3b',1000);rt.repeat.set(2,18);
+const roadMat=new THREE.MeshLambertMaterial({map:rt});
+function roadSeg(x,z,w,d,rot=0){const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),roadMat);m.rotation.x=-PI/2;m.rotation.z=rot;m.position.set(x,.025,z);m.receiveShadow=true;sc.add(m)}
+// Winding military service road; side tracks form a readable route through the combat zone.
+roadSeg(0,52,8,42,-.035);roadSeg(-1,13,8,38,.07);roadSeg(2,-26,8,44,-.045);roadSeg(0,-68,8,42,.025);
+roadSeg(-17,4,5,34,-.9);roadSeg(18,-35,5,30,.8);
+/* ---------- world: new battlefield landmarks and cover ---------- */
 const cols=[],blk=[],trees=[],cov=[];
 function bx(x,y,z,w,h,d,c,solid=true){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));m.position.set(x,y+h/2,z);m.castShadow=m.receiveShadow=true;sc.add(m);if(solid)cols.push([x-w/2,x+w/2,z-d/2,z+d/2]);blk.push(m);return m}
-function cv(x,z,w,d,h,c){bx(x,-2.15,z,w,h,d,c);cov.push([x,z,Math.max(w,d)/2])}
-function bld(x,z,w,d,h,c){const t=.4,g=3.4,sw=(w-g)/2;bx(x,0,z-d/2,w,h,t,c);bx(x-w/2,0,z,t,h,d,c);bx(x+w/2,0,z,t,h,d,c);bx(x-g/2-sw/2,0,z+d/2,sw,h,t,c);bx(x+g/2+sw/2,0,z+d/2,sw,h,t,c);bx(x,h-1.2,z+d/2,g,1.2,t,c,false);bx(x,h,z,w+.8,.3,d+.8,'#34382f',false)}
-function tower(x,z){[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(a=>bx(x+a[0]*1.4,0,z+a[1]*1.4,.3,6,.3,'#4a3a28'));bx(x,6,z,4,.25,4,'#3a3226',false);bx(x,6.25,z,4,.9,.15,'#3a3226',false)}
+function cv(x,z,w,d,h,c){bx(x,0,z,w,h,d,c)}
+function bld(x,z,w,d,h,c){const t=.4,g=Math.min(3.4,w*.42),sw=(w-g)/2;bx(x,0,z-d/2,w,h,t,c);bx(x-w/2,0,z,t,h,d,c);bx(x+w/2,0,z,t,h,d,c);bx(x-g/2-sw/2,0,z+d/2,sw,h,t,c);bx(x+g/2+sw/2,0,z+d/2,sw,h,t,c);bx(x,h-1.2,z+d/2,g,1.2,t,c,false);bx(x,h,z,w+.8,.3,d+.8,'#34372e',false)}
+function tower(x,z){[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(q=>bx(x+q[0]*1.4,0,z+q[1]*1.4,.3,6,.3,'#4a3a28'));bx(x,6,z,4,.25,4,'#3a3226',false);bx(x,6.25,z,4,.9,.15,'#3a3226',false)}
 function lamp(x,z){bx(x,0,z,.2,5,.2,'#333');const b=new THREE.Mesh(new THREE.SphereGeometry(.25,6,4),new THREE.MeshBasicMaterial({color:0xffe6a0}));b.position.set(x,5.1,z);sc.add(b)}
-// forest-belt trench network: winding communication trenches, earthen berms and sandbag positions
-const dirt='#514536',soil='#62523b',bag='#81765c',dark='#292b22';
-function trenchFloor(x,z,w,d){const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshStandardMaterial({color:dark,roughness:1}));m.rotation.x=-PI/2;m.position.set(x,-2.18,z);m.receiveShadow=true;sc.add(m);blk.push(m)}
-function trenchRamp(x,z,w,d,y0=-2.18,y1=0){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([-w/2,y0,z-d/2,w/2,y0,z-d/2,-w/2,y1,z+d/2,w/2,y1,z+d/2],3));g.setAttribute('uv',new THREE.Float32BufferAttribute([0,0,1,0,0,1,1,1],2));g.setIndex([0,2,1,1,2,3]);g.computeVertexNormals();const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:'#39362b',roughness:1,side:THREE.DoubleSide}));m.receiveShadow=true;sc.add(m);blk.push(m)}
-function berm(x,z,w,d,h=2.3){
- const alongX=w>d,thick=Math.min(w,d),len=Math.max(w,d),base=thick/2,top=Math.max(.28,base*.32),y0=-2.15,y1=y0+h;
- const p=[];for(const end of [-len/2,len/2])for(const q of [[-base,y0],[base,y0],[top,y1],[-top,y1]])p.push(q[0],q[1],end);
- const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.setIndex([0,1,2,0,2,3,4,6,5,4,7,6,0,4,5,0,5,1,1,5,6,1,6,2,2,6,7,2,7,3,3,7,4,3,4,0]);g.computeVertexNormals();
- const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:soil,roughness:1}));m.position.set(x,0,z);if(alongX)m.rotation.y=Math.PI/2;m.castShadow=m.receiveShadow=true;sc.add(m);blk.push(m);cols.push([x-w/2,x+w/2,z-d/2,z+d/2]);return m
-}
-function duckboards(x,z,w,d){const alongZ=d>w,len=Math.max(w,d),width=Math.min(w,d)-.55;for(let q=-len/2+.85;q<len/2-.35;q+=1.15){const m=new THREE.Mesh(new THREE.BoxGeometry(alongZ?width:.22,.075,alongZ?.22:width),new THREE.MeshStandardMaterial({color:'#604a31',roughness:1}));m.position.set(alongZ?x:x+q,-2.105,alongZ?z+q:z);m.castShadow=m.receiveShadow=true;sc.add(m);blk.push(m)}}
-function trenchSupports(x,z,w,d){const alongZ=d>w,len=Math.max(w,d),offset=Math.min(w,d)/2-.13;for(let q=-len/2+2;q<len/2-1;q+=4)for(const side of [-1,1]){const m=new THREE.Mesh(new THREE.BoxGeometry(alongZ?.14:.72,1.55,alongZ?.72:.14),new THREE.MeshStandardMaterial({color:'#493a29',roughness:1}));m.position.set(x+(alongZ?side*offset:q),-1.25,z+(alongZ?q:side*offset));m.castShadow=m.receiveShadow=true;sc.add(m);blk.push(m)}}
-function sandbags(x,z,n,axis='x'){for(let i=0;i<n;i++){const o=new THREE.Mesh(new THREE.BoxGeometry(axis==='x'?.92:.62,.34,.62),mat(bag));o.position.set(x+(axis==='x'?(i-(n-1)/2)*.72:0),-1.78,z+(axis==='z'?(i-(n-1)/2)*.58:0));o.rotation.y=(R()-.5)*.12;o.castShadow=o.receiveShadow=true;sc.add(o);blk.push(o)}}
-// One continuous communication trench with three connected lateral branches.
-function trenchLeg(x,z,w,d){
- trenchFloor(x,z,w,d);
- if(d>w){berm(x-w/2-1.0,z,1.7,d);berm(x+w/2+1.0,z,1.7,d)}
- else{berm(x,z-d/2-1.0,w,1.7);berm(x,z+d/2+1.0,w,1.7)}
- duckboards(x,z,w,d);trenchSupports(x,z,w,d);
-}
-trenchLeg(0,-20,5,84);
-trenchLeg(-10,-8,20,5);
-trenchLeg(10,-30,20,5);
-trenchLeg(-10,-52,20,5);
-// Open sloped entrance joins the approach directly to the main trench.
-trenchRamp(0,18,5,10,-2.18,0);
-berm(-3.5,18,1.7,10);berm(3.5,18,1.7,10);
-// Sandbag positions sit beside branch junctions without blocking the passage.
-sandbags(-3.2,-2,5,'z');sandbags(3.2,-26,5,'z');sandbags(-3.2,-48,5,'z');
-cv(12,-4,3,2,1.2,'#596044');cv(-25,-17,3,2,1.2,'#596044');cv(8,-37,3,2,1.2,'#596044');
-for(let i=0;i<18;i++){const x=(R()-.5)*66,z=-12-R()*52;if(Math.abs(x)<25&&z<-5&&z>-62)continue;const h=.35+R()*.5;const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(.7+R()*.8,0),mat(i%2?'#5b5948':'#6a604c'));rock.position.set(x,h*.5,z);rock.scale.y=h;rock.castShadow=true;sc.add(rock);blk.push(rock)}
-const intel=new THREE.Mesh(new THREE.BoxGeometry(.5,.25,.35),new THREE.MeshBasicMaterial({color:0x7dffa0}));intel.position.set(3,-1.1,-63);sc.add(intel);
-function getFloorY(x,z){if(Math.abs(x)<2.5&&z>=13&&z<=23)return -2.15*(23-z)/10;for(const r of trenchRects)if(Math.abs(x-r[0])<=r[2]/2&&Math.abs(z-r[1])<=r[3]/2)return -2.15;return 0}
+function wall(x,z,w,d,h=2.2,c='#625b49'){bx(x,0,z,w,h,d,c)}
+function rubble(x,z,n=7){for(let i=0;i<n;i++){const h=.25+R()*.9,m=new THREE.Mesh(new THREE.DodecahedronGeometry(.35+R()*.8,0),mat(i%2?'#625c4d':'#494b40'));m.position.set(x+(R()-.5)*5,h*.45,z+(R()-.5)*5);m.rotation.set(R(),R()*3,R());m.scale.y=.5+R();m.castShadow=true;sc.add(m);blk.push(m)}}
+function wreck(x,z,rot=0){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;sc.add(g);const body=new THREE.Mesh(new THREE.BoxGeometry(2.4,.85,4.8),mat('#343a32'));body.position.y=.8;body.rotation.z=-.08;g.add(body);const cabin=new THREE.Mesh(new THREE.BoxGeometry(2.05,.85,2.1),mat('#454b40'));cabin.position.set(0,1.55,-.25);g.add(cabin);for(const q of [-1,1])for(const p of [-1,1]){const wh=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.24,10),mat('#171a18'));wh.rotation.z=Math.PI/2;wh.position.set(q*1.15,.45,p*1.45);g.add(wh)}g.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true}});cols.push([x-1.8,x+1.8,z-2.8,z+2.8]);blk.push(g)}
+// South approach and a battered forward checkpoint.
+wall(-8,38,10,.65,1.3);wall(9,29,8,.65,1.5);wreck(-13,48,-.2);
+for(let i=0;i<8;i++)bx(-3+i*.9,0,35,.65,.55,.55,'#75694f');
+tower(12,22);lamp(-10,20);
+// Ruined hamlet: staggered buildings with broken walls, yards and multiple approach lanes.
+bld(-17,2,13,11,5.8,'#5b594c');bld(18,-5,12,10,5.2,'#514f45');
+bld(-22,-25,10,13,4.8,'#625b4b');bld(19,-37,14,10,5.5,'#55564b');
+wall(-7,-10,11,.6,1.5);wall(7,-21,.6,13,1.8);wall(-12,-36,9,.6,1.2);
+wall(9,5,8,.6,1.3);wall(27,-18,.6,12,1.6);
+rubble(-17,2,10);rubble(18,-5,9);rubble(-22,-25,8);rubble(19,-37,10);
+wreck(5,-12,.65);wreck(-8,-43,-.8);
+for(let i=0;i<13;i++){const x=-29+R()*58,z=-45+R()*54;if(Math.abs(x)<5&&z>-40&&z<25)continue;const h=.3+R()*.8;const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(.45+R()*.9,0),mat('#686452'));rock.position.set(x,h*.45,z);rock.scale.y=h;rock.rotation.set(R(),R(),R());rock.castShadow=true;sc.add(rock);blk.push(rock)}
+// Northern relay compound: fenced perimeter, generator sheds, mast and objective beacon.
+wall(-13,-53,25,.7,2);wall(13,-53,25,.7,2);wall(-25,-66,.7,26,2);wall(25,-66,.7,26,2);
+wall(-12,-79,26,.7,2);wall(12,-79,26,.7,2);
+bld(-12,-65,8,7,3.8,'#4b5149');bld(13,-66,9,8,4.2,'#55594d');tower(0,-67);lamp(20,-57);
+for(let i=0;i<8;i++){const x=-8+i*2.3;bx(x,0,-52,.9,1.1,.65,'#77745e')}
+const intel=new THREE.Mesh(new THREE.BoxGeometry(.5,.25,.35),new THREE.MeshBasicMaterial({color:0x7dffa0}));intel.position.set(3,.45,-63);sc.add(intel);
+function getFloorY(x,z){return 0}
 function blocked(x,z,r){if(Math.abs(x)>112||Math.abs(z)>112)return 1;for(const c of cols)if(x>c[0]-r&&x<c[1]+r&&z>c[2]-r&&z<c[3]+r)return 1;for(let i=0;i<trees.length;i+=2){const a=x-trees[i],b=z-trees[i+1];if(a*a+b*b<(r+.35)*(r+.35))return 1}return 0}
 function move(o,dx,dz,r){if(!blocked(o.x+dx,o.z,r))o.x+=dx;if(!blocked(o.x,o.z+dz,r))o.z+=dz}
 /* ---------- forest (instanced) ---------- */
@@ -143,7 +135,7 @@ for(let i=0;i<n;i++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,co
 function forest(){if(fg){sc.remove(fg);fg.traverse(o=>o.geometry&&o.geometry.dispose())}fg=new THREE.Group();sc.add(fg);trees.length=0;
 const n=[260,560,900][Q],g=[0,1500,3500][Q],tr=new THREE.InstancedMesh(new THREE.CylinderGeometry(.18,.3,1,5),mat('#4a3a2a'),n),c1=new THREE.InstancedMesh(new THREE.ConeGeometry(1.8,4,6),wmat(.3,.25),n),c2=new THREE.InstancedMesh(new THREE.ConeGeometry(1.3,4,6),wmat(.35,.25),n),
 bu=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.8,0),wmat(.06,.6),n>>1),rk=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(.8,0),mat('#777a72'),n>>2),gr=g?new THREE.InstancedMesh(new THREE.ConeGeometry(.07,.8,3),wmat(.3,1.25),g):0;
-const M=new THREE.Matrix4(),C=new THREE.Color(),Sc=new THREE.Vector3(),Q4=new THREE.Quaternion(),P3=new THREE.Vector3(),ok=(x,z)=>!(Math.abs(x)<25&&z>-68&&z<16)&&Math.hypot(x,z-70)>6;
+const M=new THREE.Matrix4(),C=new THREE.Color(),Sc=new THREE.Vector3(),Q4=new THREE.Quaternion(),P3=new THREE.Vector3(),ok=(x,z)=>!(Math.abs(x)<34&&z>-88&&z<82)&&Math.hypot(x,z-70)>9;
 const put=(m,i,x,y,z,sx,sy,sz)=>{M.compose(P3.set(x,y,z),Q4.setFromAxisAngle(new THREE.Vector3(0,1,0),R()*6),Sc.set(sx,sy,sz));m.setMatrixAt(i,M)};
 for(let i=0;i<n;){const x=(R()-.5)*230,z=(R()-.5)*230;if(!ok(x,z))continue;const s=.9+R()*.9;trees.push(x,z);put(tr,i,x,3*s,z,1,6*s,1);put(c1,i,x,5*s,z,s,s,s);put(c2,i,x,7.4*s,z,s*.7,s*.7,s*.7);C.setHSL(.33+R()*.05,.35,.12+R()*.08);c1.setColorAt(i,C);c2.setColorAt(i,C);i++}
 for(let i=0;i<n>>1;){const x=(R()-.5)*230,z=(R()-.5)*230;if(!ok(x,z))continue;put(bu,i,x,.4,z,1+R(),.7+R()*.6,1+R());C.setHSL(.25+R()*.08,.4,.14+R()*.08);bu.setColorAt(i,C);i++}
@@ -304,23 +296,23 @@ else{const w=e.type==='a'?15:26;if(dist>w)go(e,P.x,P.z,3,dt,false);else if(dist<
 if(e.see)e.yaw=turn(e.yaw,Math.atan2(-dx,-dz),dt*8);
 e.cd-=dt;if(e.see&&e.cd<=0&&Math.abs(face)<.35&&dist<75){eshot(e,dist);e.burst++;e.cd=e.burst%4?.12:.7+R()*.9}}
 e.fl-=dt;if(e.fl<=0)e.mf.visible=false;
-e.g.position.set(e.x,-2.15,e.z);e.g.rotation.y=e.yaw;const sw=Math.sin(e.ph)*.6;e.L.rotation.x=sw;e.Rl.rotation.x=-sw}
-const paths=[[[-1,-3],[1,-8],[-1,-12]],[[-7,-12],[-13,-14],[-15,-24]],[[-15,-26],[-15,-36],[-14,-42]],[[-4,-47],[2,-47],[3,-55]],[[3,-55],[3,-61],[0,-57]],[[-18,-29],[-15,-35],[-12,-39]],[[8,-5],[12,-12],[6,-16]],[[10,-35],[5,-42],[2,-47]],[[0,-18],[-7,-14],[-14,-17]]];
+e.g.position.set(e.x,0,e.z);e.g.rotation.y=e.yaw;const sw=Math.sin(e.ph)*.6;e.L.rotation.x=sw;e.Rl.rotation.x=-sw}
+const paths=[[[0,8],[5,1],[10,-7]],[[12,-8],[17,-17],[19,-27]],[[-15,-10],[-20,-20],[-22,-29]],[[5,-30],[12,-40],[18,-48]],[[-10,-38],[-5,-49],[0,-58]],[[22,-27],[15,-35],[8,-43]],[[-24,-22],[-14,-31],[-8,-40]],[[0,-49],[8,-57],[13,-66]],[[15,-8],[7,-18],[0,-26]]];
 function spawnAll(){en.forEach(e=>sc.remove(e.g));en.length=0;paths.forEach((p,i)=>spawn(p,i%2?'c':'a'));rebuild()}
 /* ---------- mission / UI ---------- */
 let nt;function note(t){const n=$('note');n.textContent=t;n.style.opacity=1;clearTimeout(nt);nt=setTimeout(()=>n.style.opacity=0,4500)}
-function intro(){const i=$('intro');i.innerHTML='<b>OPERATION: FOREST SHADOW</b><span>Enter through the open earth ramp and follow the connected trench line. Duckboards, timber revetments and sandbag firing bays mark the route. Press F to launch the strike drone and take control from its FPV camera.</span>';i.style.opacity=1;setTimeout(()=>i.style.opacity=0,6500);setTimeout(()=>note('Follow the sloped entrance ramp into the connected trench network. Press F to launch the FPV strike drone.'),7600)}
+function intro(){const i=$('intro');i.innerHTML='<b>OPERATION: BROKEN SIGNAL</b><span>Push along the winding service road, fight through the ruined hamlet and breach the northern relay compound. Press F to launch the strike drone and take control from its FPV camera.</span>';i.style.opacity=1;setTimeout(()=>i.style.opacity=0,6500);setTimeout(()=>note('Follow the service road through the ruined village to the northern relay compound. Press F to launch the FPV strike drone.'),7600)}
 function show(m){state=m==='start'?'start':m==='play'?'play':m;if(m!=='play'){droneMode=false;W.visible=true;$('bD').textContent='DRONE [F]';$('dronehud').style.display='none';if(drone)drone.visible=false;I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0}const mn=$('menu');mn.style.display=m==='play'?'none':'flex';$('set').style.display='none';
-const t={start:['BODYCAM','OPERATION: FOREST SHADOW'],pause:['PAUSED','OPERATION: FOREST SHADOW'],dead:['KIA','You did not make it out.'],win:['MISSION COMPLETE','Intel secured. Exfiltration under way.']}[m]||['',''];$('mt').style.display=$('ms').style.display='';$('mt').textContent=t[0];$('ms').textContent=t[1];
+const t={start:['BODYCAM','OPERATION: BROKEN SIGNAL'],pause:['PAUSED','OPERATION: BROKEN SIGNAL'],dead:['KIA','You did not make it out.'],win:['MISSION COMPLETE','Intel secured. Exfiltration under way.']}[m]||['',''];$('mt').style.display=$('ms').style.display='';$('mt').textContent=t[0];$('ms').textContent=t[1];
 $('mP').style.display=m==='start'?'':'none';$('mRs').style.display=m==='pause'?'':'none';$('mRe').style.display=m==='start'?'none':'';$('mS').style.display='';if(m!=='play'&&document.exitPointerLock)document.exitPointerLock()}
 function start(){audio();resetP();spawnAll();stage=0;intel.visible=true;show('play');intro();lock()}
 function lock(){if(!T&&$('c').requestPointerLock)$('c').requestPointerLock()}
 function pause(){if(state==='play'){I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0;show('pause')}}
 function mission(){const al=en.filter(e=>e.alive).length;
-if(stage===0&&P.z<8){stage=1;note('Trench line reached. Clear the enemy positions.')}
+if(stage===0&&P.z<8){stage=1;note('Forward village reached. Clear the enemy positions.')}
 if(stage===1&&!al){stage=2;note('Forward line secure. Recover the field intel.')}
-const near=Math.hypot(P.x-3,P.z+63)<2.8&&!P.dead&&!droneMode;$('bU').style.display=T&&near?'flex':'none';if(near&&!T&&tm%6<.05)note('[E] Take field intel');intel.rotation.y=tm*2}
-function useIt(){if(droneMode){toggleDrone();return}if(Math.hypot(P.x-3,P.z+63)>2.8||P.dead)return;if(stage<2){note('Hostiles are still active.');return}intel.visible=false;show('win')}
+const near=Math.hypot(P.x-3,P.z+63)<3.5&&!P.dead&&!droneMode;$('bU').style.display=T&&near?'flex':'none';if(near&&!T&&tm%6<.05)note('[E] Take field intel');intel.rotation.y=tm*2}
+function useIt(){if(droneMode){toggleDrone();return}if(Math.hypot(P.x-3,P.z+63)>3.5||P.dead)return;if(stage<2){note('Hostiles are still active.');return}intel.visible=false;show('win')}
 /* ---------- customizable controls ---------- */
 const IDS=['jb','bF','bA','bR','bC','bJ','bU','bP'],BS={jb:110,bF:86,bA:64,bR:56,bC:56,bJ:56,bU:64,bP:40},NAME={jb:'Joystick',bF:'Fire',bA:'Aim',bR:'Reload',bC:'Crouch',bJ:'Jump',bU:'Interact',bP:'Pause'},
 DEF={jb:{x:.14,y:.74},bF:{x:.91,y:.76},bA:{x:.78,y:.82},bR:{x:.93,y:.46},bC:{x:.83,y:.56},bJ:{x:.69,y:.66},bU:{x:.5,y:.62},bP:{x:.96,y:.09}},KEY='bodycam.controls.v1',clone=o=>JSON.parse(JSON.stringify(o));
