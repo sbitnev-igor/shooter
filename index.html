@@ -292,14 +292,14 @@ function spawnAll(){en.forEach(e=>sc.remove(e.g));en.length=0;paths.forEach((p,i
 let nt;function note(t){const n=$('note');n.textContent=t;n.style.opacity=1;clearTimeout(nt);nt=setTimeout(()=>n.style.opacity=0,4500)}
 function intro(){const i=$('intro');i.innerHTML='<b>OPERATION: TRENCH HAMMER</b><span>Advance through the connected trench lines, clear enemy firing bays and secure the forward command post. Press F to launch the strike drone and take control from its FPV camera.</span>';i.style.opacity=1;setTimeout(()=>i.style.opacity=0,6500);setTimeout(()=>note('Follow the trench network to the forward command post. Press F to launch the FPV strike drone.'),7600)}
 function show(m){state=m==='start'?'start':m==='play'?'play':m;if(m!=='play'){droneMode=false;W.visible=true;$('bD').textContent='DRONE [F]';$('dronehud').style.display='none';if(drone)drone.visible=false;I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0}const mn=$('menu');mn.style.display=m==='play'?'none':'flex';$('set').style.display='none';
-const t={start:['BODYCAM','OPERATION: BROKEN SIGNAL'],pause:['PAUSED','OPERATION: BROKEN SIGNAL'],dead:['KIA','You did not make it out.'],win:['MISSION COMPLETE','Intel secured. Exfiltration under way.']}[m]||['',''];$('mt').style.display=$('ms').style.display='';$('mt').textContent=t[0];$('ms').textContent=t[1];
+const t={start:['BODYCAM','OPERATION: TRENCH HAMMER'],pause:['PAUSED','OPERATION: TRENCH HAMMER'],dead:['KIA','You did not make it out.'],win:['MISSION COMPLETE','Intel secured. Exfiltration under way.']}[m]||['',''];$('mt').style.display=$('ms').style.display='';$('mt').textContent=t[0];$('ms').textContent=t[1];
 $('mP').style.display=m==='start'?'':'none';$('mRs').style.display=m==='pause'?'':'none';$('mRe').style.display=m==='start'?'none':'';$('mS').style.display='';if(m!=='play'&&document.exitPointerLock)document.exitPointerLock()}
 function start(){audio();resetP();spawnAll();stage=0;intel.visible=true;show('play');intro();lock()}
 function lock(){if(!T&&$('c').requestPointerLock)$('c').requestPointerLock()}
 function pause(){if(state==='play'){I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0;show('pause')}}
 function mission(){const al=en.filter(e=>e.alive).length;
-if(stage===0&&P.z<8){stage=1;note('Forward village reached. Clear the enemy positions.')}
-if(stage===1&&!al){stage=2;note('Forward line secure. Recover the field intel.')}
+if(stage===0&&P.z<8){stage=1;note('Forward trench line reached. Clear the enemy positions.')}
+if(stage===1&&!al){stage=2;note('Trench network secure. Recover the field intel.')}
 const near=Math.hypot(P.x-3,P.z+63)<3.5&&!P.dead&&!droneMode;$('bU').style.display=T&&near?'flex':'none';if(near&&!T&&tm%6<.05)note('[E] Take field intel');intel.rotation.y=tm*2}
 function useIt(){if(droneMode){toggleDrone();return}if(Math.hypot(P.x-3,P.z+63)>3.5||P.dead)return;if(stage<2){note('Hostiles are still active.');return}intel.visible=false;show('win')}
 /* ---------- customizable controls ---------- */
