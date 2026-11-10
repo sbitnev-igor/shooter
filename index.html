@@ -87,14 +87,22 @@ function cv(x,z,w,d,h,c){bx(x,0,z,w,h,d,c);cov.push([x,z,Math.max(w,d)/2])}
 function bld(x,z,w,d,h,c){const t=.4,g=3.4,sw=(w-g)/2;bx(x,0,z-d/2,w,h,t,c);bx(x-w/2,0,z,t,h,d,c);bx(x+w/2,0,z,t,h,d,c);bx(x-g/2-sw/2,0,z+d/2,sw,h,t,c);bx(x+g/2+sw/2,0,z+d/2,sw,h,t,c);bx(x,h-1.2,z+d/2,g,1.2,t,c,false);bx(x,h,z,w+.8,.3,d+.8,'#34382f',false)}
 function tower(x,z){[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(a=>bx(x+a[0]*1.4,0,z+a[1]*1.4,.3,6,.3,'#4a3a28'));bx(x,6,z,4,.25,4,'#3a3226',false);bx(x,6.25,z,4,.9,.15,'#3a3226',false)}
 function lamp(x,z){bx(x,0,z,.2,5,.2,'#333');const b=new THREE.Mesh(new THREE.SphereGeometry(.25,6,4),new THREE.MeshBasicMaterial({color:0xffe6a0}));b.position.set(x,5.1,z);sc.add(b)}
-// perimeter fence (gate gap at south)
-bx(0,0,-44,76,2.4,.15,'#5a5e5a');bx(-38,0,-16,.15,2.4,56,'#5a5e5a');bx(38,0,-16,.15,2.4,56,'#5a5e5a');bx(-21,0,12,34,2.4,.15,'#5a5e5a');bx(21,0,12,34,2.4,.15,'#5a5e5a');
-bx(-7,0,9,3,3,3,'#6b6d62');bx(-3.6,0,8,.3,.3,.3,'#aa3a2a');cv(-3,4,3,1,1,'#8a8a85');cv(3,4,3,1,1,'#8a8a85');cv(-9,-2,1,3,1,'#8a8a85');cv(9,-2,1,3,1,'#8a8a85');
-bld(-22,-6,16,8,4,'#6a6f58');bld(22,-6,16,8,4,'#6a6f58');bld(0,-34,28,18,9,'#5b6360');
-bx(10,.5,-18,6,2.3,2.6,'#4b5a3c');cv(-12,-18,4.4,2,1.7,'#55603f');cv(-6,-14,1.4,1.4,1.2,'#7a6240');cv(6,-12,1.4,1.4,1.2,'#7a6240');cv(0,-18,3,1,1,'#8a8a85');cv(-28,-18,1.6,1.6,1.2,'#7a6240');cv(28,-18,1.6,1.6,1.2,'#7a6240');cv(-6,-30,2,2,1.4,'#7a6240');cv(8,-36,2,2,1.4,'#7a6240');
-cov.push([10,-18,3]);[[-34,-40],[34,-40],[34,8],[-34,8]].forEach(p=>tower(...p));[[-14,2],[14,2],[0,-20],[-30,-30],[30,-30]].forEach(p=>lamp(...p));
-bx(0,0,-41,2.4,.9,1.2,'#5a4a30');const intel=new THREE.Mesh(new THREE.BoxGeometry(.5,.25,.35),new THREE.MeshBasicMaterial({color:0x7dffa0}));intel.position.set(0,1.05,-41);sc.add(intel);
-[[0,6,-34],[-22,3,-6],[22,3,-6]].forEach(p=>{const l=new THREE.PointLight(0xffe0a0,1,24);l.position.set(...p);sc.add(l)});
+// forest-belt trench network: winding communication trenches, earthen berms and sandbag positions
+const dirt='#514536',soil='#62523b',bag='#81765c',dark='#292b22';
+function trenchFloor(x,z,w,d){const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshLambertMaterial({color:dark}));m.rotation.x=-PI/2;m.position.set(x,.045,z);sc.add(m)}
+function berm(x,z,w,d,h=1.45){bx(x,0,z,w,h,d,soil)}
+function sandbags(x,z,n,axis='x'){for(let i=0;i<n;i++){const o=new THREE.Mesh(new THREE.BoxGeometry(axis==='x'?.92:.62,.34,.62),mat(bag));o.position.set(x+(axis==='x'?(i-(n-1)/2)*.72:0),.38,z+(axis==='z'?(i-(n-1)/2)*.58:0));o.rotation.y=(R()-.5)*.12;o.castShadow=o.receiveShadow=true;sc.add(o);blk.push(o)}}
+// Entry communication trench, bends left, then returns toward the forward firing line
+trenchFloor(0,1,5,24);berm(-3.35,1,.85,24);berm(3.35,1,.85,24);
+trenchFloor(-7,-14,19,5);berm(-7,-17.35,19,.85);berm(-7,-10.65,19,.85);
+trenchFloor(-15,-31,5,29);berm(-18.35,-31,.85,29);berm(-11.65,-31,.85,29);
+trenchFloor(-4,-47,18,5);berm(-4,-50.35,18,.85);berm(-4,-43.65,18,.85);
+trenchFloor(3,-57,5,18);berm(-.35,-57,.85,18);berm(6.35,-57,.85,18);
+// Raised firing bays, traverses and sandbag parapets
+sandbags(-3.3,-4,5,'z');sandbags(-7,-10.8,8,'x');sandbags(-18,-29,5,'z');sandbags(-4,-43.8,7,'x');sandbags(6,-54,5,'z');
+cv(12,-4,3,2,1.2,'#596044');cv(-25,-17,3,2,1.2,'#596044');cv(8,-37,3,2,1.2,'#596044');
+for(let i=0;i<18;i++){const x=(R()-.5)*66,z=-12-R()*52;if(Math.abs(x)<25&&z<-5&&z>-62)continue;const h=.35+R()*.5;const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(.7+R()*.8,0),mat(i%2?'#5b5948':'#6a604c'));rock.position.set(x,h*.5,z);rock.scale.y=h;rock.castShadow=true;sc.add(rock);blk.push(rock)}
+const intel=new THREE.Mesh(new THREE.BoxGeometry(.5,.25,.35),new THREE.MeshBasicMaterial({color:0x7dffa0}));intel.position.set(3,1.05,-63);sc.add(intel);
 function blocked(x,z,r){if(Math.abs(x)>112||Math.abs(z)>112)return 1;for(const c of cols)if(x>c[0]-r&&x<c[1]+r&&z>c[2]-r&&z<c[3]+r)return 1;for(let i=0;i<trees.length;i+=2){const a=x-trees[i],b=z-trees[i+1];if(a*a+b*b<(r+.35)*(r+.35))return 1}return 0}
 function move(o,dx,dz,r){if(!blocked(o.x+dx,o.z,r))o.x+=dx;if(!blocked(o.x,o.z+dz,r))o.z+=dz}
 /* ---------- forest (instanced) ---------- */
@@ -109,7 +117,7 @@ for(let i=0;i<n;i++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,co
 function forest(){if(fg){sc.remove(fg);fg.traverse(o=>o.geometry&&o.geometry.dispose())}fg=new THREE.Group();sc.add(fg);trees.length=0;
 const n=[260,560,900][Q],g=[0,1500,3500][Q],tr=new THREE.InstancedMesh(new THREE.CylinderGeometry(.18,.3,1,5),mat('#4a3a2a'),n),c1=new THREE.InstancedMesh(new THREE.ConeGeometry(1.8,4,6),wmat(.3,.25),n),c2=new THREE.InstancedMesh(new THREE.ConeGeometry(1.3,4,6),wmat(.35,.25),n),
 bu=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.8,0),wmat(.06,.6),n>>1),rk=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(.8,0),mat('#777a72'),n>>2),gr=g?new THREE.InstancedMesh(new THREE.ConeGeometry(.07,.8,3),wmat(.3,1.25),g):0;
-const M=new THREE.Matrix4(),C=new THREE.Color(),Sc=new THREE.Vector3(),Q4=new THREE.Quaternion(),P3=new THREE.Vector3(),ok=(x,z)=>!(Math.abs(x)<45&&z>-50&&z<18)&&!(Math.abs(x)<4.5&&z>10)&&Math.hypot(x,z-70)>6;
+const M=new THREE.Matrix4(),C=new THREE.Color(),Sc=new THREE.Vector3(),Q4=new THREE.Quaternion(),P3=new THREE.Vector3(),ok=(x,z)=>!(Math.abs(x)<25&&z>-68&&z<16)&&Math.hypot(x,z-70)>6;
 const put=(m,i,x,y,z,sx,sy,sz)=>{M.compose(P3.set(x,y,z),Q4.setFromAxisAngle(new THREE.Vector3(0,1,0),R()*6),Sc.set(sx,sy,sz));m.setMatrixAt(i,M)};
 for(let i=0;i<n;){const x=(R()-.5)*230,z=(R()-.5)*230;if(!ok(x,z))continue;const s=.9+R()*.9;trees.push(x,z);put(tr,i,x,3*s,z,1,6*s,1);put(c1,i,x,5*s,z,s,s,s);put(c2,i,x,7.4*s,z,s*.7,s*.7,s*.7);C.setHSL(.33+R()*.05,.35,.12+R()*.08);c1.setColorAt(i,C);c2.setColorAt(i,C);i++}
 for(let i=0;i<n>>1;){const x=(R()-.5)*230,z=(R()-.5)*230;if(!ok(x,z))continue;put(bu,i,x,.4,z,1+R(),.7+R()*.6,1+R());C.setHSL(.25+R()*.08,.4,.14+R()*.08);bu.setColorAt(i,C);i++}
@@ -239,11 +247,11 @@ if(e.see)e.yaw=turn(e.yaw,Math.atan2(-dx,-dz),dt*8);
 e.cd-=dt;if(e.see&&e.cd<=0&&Math.abs(face)<.35&&dist<75){eshot(e,dist);e.burst++;e.cd=e.burst%4?.12:.7+R()*.9}}
 e.fl-=dt;if(e.fl<=0)e.mf.visible=false;
 e.g.position.set(e.x,0,e.z);e.g.rotation.y=e.yaw;const sw=Math.sin(e.ph)*.6;e.L.rotation.x=sw;e.Rl.rotation.x=-sw}
-const paths=[[[-8,6],[8,6]],[[-30,-20],[-30,-38],[-16,-22]],[[30,-20],[30,-38],[16,-22]],[[-3,-14],[5,-14],[5,-24],[-5,-24]],[[-8,-38],[8,-38]],[[0,-30],[10,-40]],[[-22,2],[-32,-10]],[[22,2],[32,-10]],[[0,-22],[0,-12]]];
+const paths=[[[-1,-3],[1,-8],[-1,-12]],[[-7,-12],[-13,-14],[-15,-24]],[[-15,-26],[-15,-36],[-14,-42]],[[-4,-47],[2,-47],[3,-55]],[[3,-55],[3,-61],[0,-57]],[[-18,-29],[-15,-35],[-12,-39]],[[8,-5],[12,-12],[6,-16]],[[10,-35],[5,-42],[2,-47]],[[0,-18],[-7,-14],[-14,-17]]];
 function spawnAll(){en.forEach(e=>sc.remove(e.g));en.length=0;paths.forEach((p,i)=>spawn(p,i%2?'c':'a'));rebuild()}
 /* ---------- mission / UI ---------- */
 let nt;function note(t){const n=$('note');n.textContent=t;n.style.opacity=1;clearTimeout(nt);nt=setTimeout(()=>n.style.opacity=0,4500)}
-function intro(){const i=$('intro');i.innerHTML='<b>OPERATION: FOREST SHADOW</b><span>An abandoned installation, hidden in the pines. Hostiles reported. Get in, clear it, recover the intel.</span>';i.style.opacity=1;setTimeout(()=>i.style.opacity=0,5000);setTimeout(()=>note('Follow the road north to the compound.'),7000)}
+function intro(){const i=$('intro');i.innerHTML='<b>OPERATION: FOREST SHADOW</b><span>Enemy positions dug into a pine-belt defensive line. Advance through the communication trenches, clear the firing bays and recover the field intel.</span>';i.style.opacity=1;setTimeout(()=>i.style.opacity=0,6000);setTimeout(()=>note('Advance north and enter the first communication trench.'),7500)}
 function show(m){state=m==='start'?'start':m==='play'?'play':m;if(m!=='play'){I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0}const mn=$('menu');mn.style.display=m==='play'?'none':'flex';$('set').style.display='none';
 const t={start:['BODYCAM','OPERATION: FOREST SHADOW'],pause:['PAUSED','OPERATION: FOREST SHADOW'],dead:['KIA','You did not make it out.'],win:['MISSION COMPLETE','Intel secured. Exfiltration under way.']}[m]||['',''];$('mt').style.display=$('ms').style.display='';$('mt').textContent=t[0];$('ms').textContent=t[1];
 $('mP').style.display=m==='start'?'':'none';$('mRs').style.display=m==='pause'?'':'none';$('mRe').style.display=m==='start'?'none':'';$('mS').style.display='';if(m!=='play'&&document.exitPointerLock)document.exitPointerLock()}
@@ -251,10 +259,10 @@ function start(){audio();resetP();spawnAll();stage=0;intel.visible=true;show('pl
 function lock(){if(!T&&$('c').requestPointerLock)$('c').requestPointerLock()}
 function pause(){if(state==='play'){I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0;show('pause')}}
 function mission(){const al=en.filter(e=>e.alive).length;
-if(stage===0&&P.z<8){stage=1;note('Compound breached. Hostiles inside.')}
-if(stage===1&&!al){stage=2;note('Compound clear. Recover the intel from the hangar.')}
-const near=Math.hypot(P.x,P.z+41)<2.8&&!P.dead;$('bU').style.display=T&&near?'flex':'none';if(near&&!T&&tm%6<.05)note('[E] Take intel');intel.rotation.y=tm*2}
-function useIt(){if(Math.hypot(P.x,P.z+41)>2.8||P.dead)return;if(stage<2){note('Hostiles are still active.');return}intel.visible=false;show('win')}
+if(stage===0&&P.z<8){stage=1;note('Trench line reached. Clear the enemy positions.')}
+if(stage===1&&!al){stage=2;note('Forward line secure. Recover the field intel.')}
+const near=Math.hypot(P.x-3,P.z+63)<2.8&&!P.dead;$('bU').style.display=T&&near?'flex':'none';if(near&&!T&&tm%6<.05)note('[E] Take field intel');intel.rotation.y=tm*2}
+function useIt(){if(Math.hypot(P.x-3,P.z+63)>2.8||P.dead)return;if(stage<2){note('Hostiles are still active.');return}intel.visible=false;show('win')}
 /* ---------- customizable controls ---------- */
 const IDS=['jb','bF','bA','bR','bC','bJ','bU','bP'],BS={jb:110,bF:86,bA:64,bR:56,bC:56,bJ:56,bU:64,bP:40},NAME={jb:'Joystick',bF:'Fire',bA:'Aim',bR:'Reload',bC:'Crouch',bJ:'Jump',bU:'Interact',bP:'Pause'},
 DEF={jb:{x:.14,y:.74},bF:{x:.91,y:.76},bA:{x:.78,y:.82},bR:{x:.93,y:.46},bC:{x:.83,y:.56},bJ:{x:.69,y:.66},bU:{x:.5,y:.62},bP:{x:.96,y:.09}},KEY='bodycam.controls.v1',clone=o=>JSON.parse(JSON.stringify(o));
