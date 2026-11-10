@@ -88,7 +88,7 @@ for(let iz=0;iz<GS;iz++)for(let ix=0;ix<GS;ix++){const x=-129.75+ix*.5,z=-129.75
 const gg=new THREE.BufferGeometry();gg.setAttribute('position',new THREE.BufferAttribute(gv,3));gg.setAttribute('uv',new THREE.BufferAttribute(guv,2));gg.setIndex(gix);gg.computeVertexNormals();
 const ground=new THREE.Mesh(gg,new THREE.MeshLambertMaterial({map:gt,side:THREE.DoubleSide}));ground.receiveShadow=true;sc.add(ground);
 const rt=tex('#5a4a38',900);rt.repeat.set(2,14);
-[[0,60,8,100],[0,-17,7,60]].forEach(r=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(r[2],r[3]),new THREE.MeshLambertMaterial({map:rt}));m.rotation.x=-PI/2;m.position.set(r[0],.03,r[1]);m.receiveShadow=true;sc.add(m)});
+[[0,66.5,8,87]].forEach(r=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(r[2],r[3]),new THREE.MeshLambertMaterial({map:rt}));m.rotation.x=-PI/2;m.position.set(r[0],.03,r[1]);m.receiveShadow=true;sc.add(m)});
 /* ---------- world: colliders, blockers, cover ---------- */
 const cols=[],blk=[],trees=[],cov=[];
 function bx(x,y,z,w,h,d,c,solid=true){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));m.position.set(x,y+h/2,z);m.castShadow=m.receiveShadow=true;sc.add(m);if(solid)cols.push([x-w/2,x+w/2,z-d/2,z+d/2]);blk.push(m);return m}
