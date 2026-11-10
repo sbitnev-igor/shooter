@@ -361,7 +361,7 @@ addEventListener('keyup',e=>K[e.code]=0);
 addEventListener('blur',()=>{I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0;if(state==='play'&&!T)pause()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0;if(state==='play')pause()}});
 addEventListener('mousemove',e=>{if(document.pointerLockElement&&state==='play')look(e.movementX*.0022,e.movementY*.0022)});
-addEventListener('mousedown',e=>{if(!T&&state==='play'){if(!document.pointerLockElement)return lock();if(e.button===0&&!droneMode)I.fire=1if(e.button===2&&!droneMode)P.aim=P.rl<=0?1:0}});
+addEventListener('mousedown',e=>{if(!T&&state==='play'){if(!document.pointerLockElement)return lock();if(e.button===0&&!droneMode)I.fire=1;if(e.button===2&&!droneMode)P.aim=P.rl<=0?1:0}});
 addEventListener('mouseup',e=>{if(e.button===0)I.fire=0;if(e.button===2)P.aim=0});
 document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockElement&&state==='play'&&!T)pause()});
 addEventListener('contextmenu',e=>e.preventDefault());
