@@ -157,7 +157,7 @@ bird:p=>{for(let i=0;i<3+R()*3;i++)setTimeout(()=>tn(p,2500+R()*1500,.08,.08,'si
 /* ---------- player ---------- */
 const P={},I={fire:0,aim:0,jx:0,jy:0},K={};let sens=1,state='start',stage=0,tm=0,rec=0;
 let droneMode=false,drone=null,droneYaw=0,dronePitch=-.08,dronePayloads=2,droneCooldown=0;
-function resetP(){droneMode=false;dronePayloads=2;if(drone)drone.visible=true;Object.assign(P,{x:30,z:32,floor:0,yaw:0,pitch:0,eye:1.65,vx:0,vz:0,crouch:0,aim:0,run:0,mv:0,dead:0,dT:0,tr:0,fl:0,arm:0,leg:0,bleed:0,ammo:30,res:150,h:0,vy:0,fT:0,rl:0,kick:0,rp:0,ph:0,sx:0,sy:0,roll:0,hb:0,stp:0});$('f').style.opacity=0;$('h').style.opacity=0;$('c').style.filter=''}
+function resetP(){droneMode=false;dronePayloads=2;if(drone)drone.visible=false;W.visible=true;$('bD').textContent='DRONE [F]';$('dronehud').style.display='none';Object.assign(P,{x:30,z:32,floor:0,yaw:0,pitch:0,eye:1.65,vx:0,vz:0,crouch:0,aim:0,run:0,mv:0,dead:0,dT:0,tr:0,fl:0,arm:0,leg:0,bleed:0,ammo:30,res:150,h:0,vy:0,fT:0,rl:0,kick:0,rp:0,ph:0,sx:0,sy:0,roll:0,hb:0,stp:0});$('f').style.opacity=0;$('h').style.opacity=0;$('c').style.filter=''}
 function look(dx,dy){if(droneMode){droneYaw-=dx*sens;dronePitch=cl(dronePitch-dy*sens,-.65,.28);return}const s=sens*(P.aim?.5:1);P.yaw-=dx*s;P.pitch=cl(P.pitch-dy*s,-1.4,1.4);P.sx=cl(P.sx+dx,-.15,.15);P.sy=cl(P.sy+dy,-.15,.15)}
 function upP(dt){
 if(droneMode){updateDrone(dt);return}
@@ -304,7 +304,7 @@ function spawnAll(){en.forEach(e=>sc.remove(e.g));en.length=0;paths.forEach((p,i
 /* ---------- mission / UI ---------- */
 let nt;function note(t){const n=$('note');n.textContent=t;n.style.opacity=1;clearTimeout(nt);nt=setTimeout(()=>n.style.opacity=0,4500)}
 function intro(){const i=$('intro');i.innerHTML='<b>OPERATION: FOREST SHADOW</b><span>Enter through the open earth ramp and follow the connected trench line. Duckboards, timber revetments and sandbag firing bays mark the route. Press F to launch the strike drone and take control from its FPV camera.</span>';i.style.opacity=1;setTimeout(()=>i.style.opacity=0,6500);setTimeout(()=>note('Follow the sloped entrance ramp into the connected trench network. Press F to launch the FPV strike drone.'),7600)}
-function show(m){state=m==='start'?'start':m==='play'?'play':m;if(m!=='play'){droneMode=false;$('bD').textContent='DRONE [F]';$('dronehud').style.display='none';if(drone)drone.visible=false;I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0}const mn=$('menu');mn.style.display=m==='play'?'none':'flex';$('set').style.display='none';
+function show(m){state=m==='start'?'start':m==='play'?'play':m;if(m!=='play'){droneMode=false;W.visible=true;$('bD').textContent='DRONE [F]';$('dronehud').style.display='none';if(drone)drone.visible=false;I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0}const mn=$('menu');mn.style.display=m==='play'?'none':'flex';$('set').style.display='none';
 const t={start:['BODYCAM','OPERATION: FOREST SHADOW'],pause:['PAUSED','OPERATION: FOREST SHADOW'],dead:['KIA','You did not make it out.'],win:['MISSION COMPLETE','Intel secured. Exfiltration under way.']}[m]||['',''];$('mt').style.display=$('ms').style.display='';$('mt').textContent=t[0];$('ms').textContent=t[1];
 $('mP').style.display=m==='start'?'':'none';$('mRs').style.display=m==='pause'?'':'none';$('mRe').style.display=m==='start'?'none':'';$('mS').style.display='';if(m!=='play'&&document.exitPointerLock)document.exitPointerLock()}
 function start(){audio();resetP();spawnAll();stage=0;intel.visible=true;show('play');intro();lock()}
