@@ -111,10 +111,10 @@ function trenchSupports(x,z,w,d){const alongZ=d>w,len=Math.max(w,d),offset=Math.
 function sandbags(x,z,n,axis='x'){for(let i=0;i<n;i++){const o=new THREE.Mesh(new THREE.BoxGeometry(axis==='x'?.92:.62,.34,.62),mat(bag));o.position.set(x+(axis==='x'?(i-(n-1)/2)*.72:0),-1.78,z+(axis==='z'?(i-(n-1)/2)*.58:0));o.rotation.y=(R()-.5)*.12;o.castShadow=o.receiveShadow=true;sc.add(o);blk.push(o)}}
 // Entry communication trench, bends left, then returns toward the forward firing line
 trenchFloor(0,1,5,28);berm(-3.35,1,1.7,28);berm(3.35,1,1.7,28);
-trenchFloor(-7,-14,20,5);berm(-7,-17.35,20,1.7);berm(-7,-10.65,20,1.7);
-trenchFloor(-15,-31,5,34);berm(-18.35,-31,1.7,34);berm(-11.65,-31,1.7,34);
-trenchFloor(-6,-47,22,5);berm(-6,-50.35,22,1.7);berm(-6,-43.65,22,1.7);
-trenchFloor(3,-57,5,22);berm(-.35,-57,1.7,22);berm(6.35,-57,1.7,22);
+trenchFloor(-7,-14,20,5);berm(-7.5,-17.35,10,1.7);berm(-7.5,-10.65,10,1.7);
+trenchFloor(-15,-31,5,34);berm(-18.35,-31,1.7,24);berm(-11.65,-31,1.7,24);
+trenchFloor(-6,-47,22,5);berm(-6,-50.35,13,1.7);berm(-6,-43.65,13,1.7);
+trenchFloor(3,-57,5,22);berm(-.35,-60,1.7,16);berm(6.35,-60,1.7,16);
 trenchRamp(0,18,5,10,-2.18,0);berm(-3.35,18,1.7,10);berm(3.35,18,1.7,10);
 [[0,1,5,28],[-7,-14,20,5],[-15,-31,5,34],[-6,-47,22,5],[3,-57,5,22]].forEach(r=>{duckboards(...r);trenchSupports(...r)});
 // Raised firing bays, traverses and sandbag parapets
@@ -189,7 +189,7 @@ function buildDrone(){if(drone)return;drone=new THREE.Group();const shell=new TH
 for(let i of [-1,1])for(let j of [-1,1]){const arm=new THREE.Mesh(new THREE.BoxGeometry(.62,.045,.045),mat('#303832'));arm.position.set(i*.25,.015,j*.25);arm.rotation.y=i*j*.35;drone.add(arm);
 const rotor=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.025,12),new THREE.MeshStandardMaterial({color:0x171c19,roughness:.65}));rotor.position.set(i*.48,.08,j*.48);drone.add(rotor)}
 const lens=new THREE.Mesh(new THREE.SphereGeometry(.075,10,8),new THREE.MeshBasicMaterial({color:0x79c9d0}));lens.position.set(0,-.015,-.19);drone.add(lens);sc.add(drone);drone.visible=false}
-function toggleDrone(){if(state!=='play'||P.dead)return;buildDrone();droneMode=!droneMode;
+function toggleDrone(){if(state!=='play'||P.dead)return;if(!droneMode&&dronePayloads<=0){note('NO DRONES LEFT');return}buildDrone();droneMode=!droneMode;
 if(droneMode){drone.position.set(P.x,5.2,P.z);droneYaw=P.yaw;dronePitch=-.04;drone.visible=true;W.visible=false;P.aim=0;$('bD').textContent='RETURN [F]';note('FPV DRONE ACTIVE · AUTO-FORWARD · MOUSE: STEER · SPACE/CTRL: ALTITUDE · IMPACT: DETONATE')}
 else{drone.visible=false;W.visible=true;cam.fov=85;cam.updateProjectionMatrix();$('bD').textContent='DRONE [F]';note('Returning to body camera')}$('dronehud').style.display=droneMode?'block':'none';if(droneMode)$('dronehud').textContent='FPV STRIKE DRONE · PAYLOADS '+dronePayloads}
 function droneDetonate(point){
@@ -204,7 +204,7 @@ function droneDetonate(point){
  drone.visible=false;W.visible=true;$('bD').textContent='DRONE [F]';$('dronehud').style.display='none';cam.fov=85;cam.updateProjectionMatrix();
 }
 function updateDrone(dt){
- const speed=13,dir=new THREE.Vector3(-Math.sin(droneYaw),0,-Math.cos(droneYaw));
+ const speed=13,dir=new THREE.Vector3(-Math.sin(droneYaw)*Math.cos(dronePitch),Math.sin(dronePitch),-Math.cos(droneYaw)*Math.cos(dronePitch));
  drone.position.y=cl(drone.position.y+((K.Space||I.aim?1:0)-(K.ControlLeft||K.KeyC||K.KeyV?1:0))*8*dt,1.1,20);
  drone.rotation.set(dronePitch,droneYaw,0);
  const step=speed*dt;ray.set(drone.position,dir.clone().normalize());ray.far=step+.65;
