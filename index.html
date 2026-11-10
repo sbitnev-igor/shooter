@@ -23,6 +23,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 #bR{width:56px;height:56px;right:calc(24px + env(safe-area-inset-right));bottom:calc(138px + env(safe-area-inset-bottom))}
 #bC{width:56px;height:56px;right:calc(96px + env(safe-area-inset-right));bottom:calc(142px + env(safe-area-inset-bottom))}
 #bU{width:64px;height:64px;left:50%;margin-left:-32px;bottom:calc(30% + env(safe-area-inset-bottom));display:none}
+#bJ{width:56px;height:56px;left:calc(50% + 34px);bottom:calc(36px + env(safe-area-inset-bottom))}
 #bP{width:40px;height:40px;top:calc(8px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right))}
 #jl{position:fixed;left:0;top:0;width:42%;height:100%}#jr{position:fixed;left:42%;top:0;width:58%;height:100%}
 #jb{position:fixed;display:block;border:1.5px solid var(--bd);border-radius:50%;background:var(--ui);pointer-events:none}
@@ -214,12 +215,12 @@ function spawnAll(){en.forEach(e=>sc.remove(e.g));en.length=0;paths.forEach((p,i
 /* ---------- mission / UI ---------- */
 let nt;function note(t){const n=$('note');n.textContent=t;n.style.opacity=1;clearTimeout(nt);nt=setTimeout(()=>n.style.opacity=0,4500)}
 function intro(){const i=$('intro');i.innerHTML='<b>OPERATION: FOREST SHADOW</b><span>An abandoned installation, hidden in the pines. Hostiles reported. Get in, clear it, recover the intel.</span>';i.style.opacity=1;setTimeout(()=>i.style.opacity=0,5000);setTimeout(()=>note('Follow the road north to the compound.'),7000)}
-function show(m){state=m==='start'?'start':m==='play'?'play':m;const mn=$('menu');mn.style.display=m==='play'?'none':'flex';$('set').style.display='none';
+function show(m){state=m==='start'?'start':m==='play'?'play':m;if(m!=='play'){I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0}const mn=$('menu');mn.style.display=m==='play'?'none':'flex';$('set').style.display='none';
 const t={start:['BODYCAM','OPERATION: FOREST SHADOW'],pause:['PAUSED','OPERATION: FOREST SHADOW'],dead:['KIA','You did not make it out.'],win:['MISSION COMPLETE','Intel secured. Exfiltration under way.']}[m]||['',''];$('mt').style.display=$('ms').style.display='';$('mt').textContent=t[0];$('ms').textContent=t[1];
 $('mP').style.display=m==='start'?'':'none';$('mRs').style.display=m==='pause'?'':'none';$('mRe').style.display=m==='start'?'none':'';$('mS').style.display='';if(m!=='play'&&document.exitPointerLock)document.exitPointerLock()}
 function start(){audio();resetP();spawnAll();stage=0;intel.visible=true;show('play');intro();lock()}
 function lock(){if(!T&&$('c').requestPointerLock)$('c').requestPointerLock()}
-function pause(){if(state==='play'){show('pause')}}
+function pause(){if(state==='play'){I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0;show('pause')}}
 function mission(){const al=en.filter(e=>e.alive).length;
 if(stage===0&&P.z<8){stage=1;note('Compound breached. Hostiles inside.')}
 if(stage===1&&!al){stage=2;note('Compound clear. Recover the intel from the hangar.')}
@@ -268,6 +269,8 @@ function btn(id,dn,up){const b=$(id);b.onpointerdown=e=>{e.preventDefault();b.se
 btn('bF',()=>I.fire=1,()=>I.fire=0);btn('bA',()=>P.aim=!P.aim&&P.rl<=0?1:0);btn('bR',reload);btn('bC',()=>P.crouch=!P.crouch);btn('bU',useIt);btn('bP',pause);btn('bJ',jump);
 addEventListener('keydown',e=>{K[e.code]=1;if(state!=='play')return;if(e.code==='KeyR')reload();if(e.code==='KeyC')P.crouch=!P.crouch;if(e.code==='KeyE')useIt();if(e.code==='Space')jump();if(e.code==='Escape')pause()});
 addEventListener('keyup',e=>K[e.code]=0);
+addEventListener('blur',()=>{I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0;if(state==='play'&&!T)pause()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){I.fire=0;I.aim=0;P.aim=0;for(const k in K)K[k]=0;if(state==='play')pause()}});
 addEventListener('mousemove',e=>{if(document.pointerLockElement&&state==='play')look(e.movementX*.0022,e.movementY*.0022)});
 addEventListener('mousedown',e=>{if(!T&&state==='play'){if(!document.pointerLockElement)return lock();if(e.button===0)I.fire=1;if(e.button===2)P.aim=P.rl<=0?1:0}});
 addEventListener('mouseup',e=>{if(e.button===0)I.fire=0;if(e.button===2)P.aim=0});
